@@ -8,9 +8,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "git:push": "git add . && git commit -m \"Deploy: $(date '+%Y-%m-%d %H:%M:%S')\" && git push",
+    "git:push": "git add . && git diff-index --quiet HEAD || git commit -m \"Deploy: $(date '+%Y-%m-%d %H:%M:%S')\" && git push || true",
     "firebase:deploy": "firebase deploy --only hosting",
-    "deploy": "npm run build && npm run git:push && npm run firebase:deploy"
+    "deploy": "npm run build && npm run git:push; npm run firebase:deploy"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
