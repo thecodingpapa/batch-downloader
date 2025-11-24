@@ -10,14 +10,17 @@ import {
   Chip,
   Stack,
   CircularProgress,
+  Paper,
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DropZone from './components/DropZone';
 import VideoGrid from './components/VideoGrid';
 
 function App() {
   const [videos, setVideos] = useState([]);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [cookiesFile, setCookiesFile] = useState(null);
 
   const handleVideosParsed = (parsedVideos) => {
     setVideos(parsedVideos);
@@ -37,6 +40,13 @@ function App() {
     setVideos((prev) => prev.map((v) => ({ ...v, selected: false })));
   };
 
+  const handleCookiesUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setCookiesFile(file);
+    }
+  };
+
   const handleDownload = async () => {
     const selectedVideos = videos.filter((v) => v.selected);
     if (selectedVideos.length === 0) return;
@@ -46,13 +56,21 @@ function App() {
       for (const video of selectedVideos) {
         console.log('Requesting download for videoId:', video.videoId, 'URL:', video.originalUrl, 'start:', video.start, 'end:', video.end);
         try {
-          const response = await axios.post('https://api.pigsub.com/download', {
-            url: video.originalUrl,
-            start: video.start,
-            end: video.end,
-            videoId: video.videoId
-          }, {
+          const formData = new FormData();
+          formData.append('url', video.originalUrl);
+          formData.append('start', video.start);
+          formData.append('end', video.end);
+          formData.append('videoId', video.videoId);
+          
+          if (cookiesFile) {
+            formData.append('cookies', cookiesFile);
+          }
+
+          const response = await axios.post('https://api.pigsub.com/download', formData, {
             responseType: 'blob',
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
             // Let axios reject non‑2xx to catch errors
           });
 
@@ -68,7 +86,20 @@ function App() {
           link.remove();
         } catch (err) {
           // Axios error may contain a response with server message
-          const serverMsg = err.response?.data?.error || err.message;
+          // For blob responseType, we need to read the blob to get the error message
+          let serverMsg = err.message;
+          if (err.response && err.response.data instanceof Blob) {
+             try {
+                 const text = await err.response.data.text();
+                 const json = JSON.parse(text);
+                 serverMsg = json.error || serverMsg;
+             } catch (e) {
+                 // ignore
+             }
+          } else if (err.response?.data?.error) {
+              serverMsg = err.response.data.error;
+          }
+          
           console.error('Download failed for', video.videoId, ':', serverMsg);
           alert(`Failed to download video ${video.videoId}: ${serverMsg}`);
         }
@@ -112,6 +143,50 @@ function App() {
         {/* Drop Zone */}
         <Box sx={{ maxWidth: 800, mx: 'auto', mb: 6 }}>
           <DropZone onVideosParsed={handleVideosParsed} />
+          
+          {/* Cookies Upload Section */}
+          <Paper 
+            elevation={0} 
+            sx={{ 
+              mt: 3, 
+              p: 3, 
+              border: '1px dashed', 
+              borderColor: 'divider', 
+              borderRadius: 2,
+              bgcolor: 'background.paper',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+          >
+            <Box>
+                <Typography variant="subtitle1" fontWeight="600" gutterBottom>
+                    YouTube Authentication (Optional)
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                    Upload <code>cookies.txt</code> to bypass "Sign in to confirm you’re not a bot" errors.
+                </Typography>
+            </Box>
+            <Button
+              component="label"
+              variant="outlined"
+              startIcon={<UploadFileIcon />}
+              color={cookiesFile ? "success" : "primary"}
+            >
+              {cookiesFile ? "Cookies Loaded" : "Upload Cookies"}
+              <input
+                type="file"
+                hidden
+                accept=".txt"
+                onChange={handleCookiesUpload}
+              />
+            </Button>
+          </Paper>
+          {cookiesFile && (
+              <Typography variant="caption" color="success.main" sx={{ display: 'block', mt: 1, textAlign: 'right' }}>
+                  {cookiesFile.name} ready for upload
+              </Typography>
+          )}
         </Box>
 
         {/* Video Grid Section */}
