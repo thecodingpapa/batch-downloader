@@ -2,21 +2,36 @@
 
 A web application to batch download YouTube video clips with custom start and end times.
 
-## Prerequisites
+## Quick Start (No Prerequisites Required!)
 
-- Node.js (v20.19+ or v22.12+ recommended)
-- npm
+The installation script will automatically install Node.js and all dependencies if they're not already on your system.
 
-## Installation
+### 1. Download the project
 
-1. Clone this repository
-2. Run the installation script:
+1. Download the ZIP file: [batch-downloader-main.zip](https://github.com/thecodingpapa/batch-downloader/archive/refs/heads/main.zip)
+2. Extract the ZIP file
+3. Open terminal and navigate to the extracted folder:
+   ```bash
+   cd batch-downloader-main
+   ```
+
+### 2. Run the installation script
 
 ```bash
+chmod +x install-batch-downloader.sh
 ./install-batch-downloader.sh
 ```
 
-This will install all dependencies for both the client and server.
+**What this script does:**
+- Detects your operating system (macOS, Linux, or Windows)
+- Installs Node.js and npm if not already installed
+  - **macOS**: Installs via Homebrew (installs Homebrew first if needed)
+  - **Linux**: Installs via package manager (apt/yum)
+  - **Windows**: Provides manual installation instructions
+- Installs all client and server dependencies
+- Verifies everything is set up correctly
+
+> **Note**: On macOS, if Homebrew is not installed, you'll be prompted to install it first. On Windows, you'll need to manually download and install Node.js from [nodejs.org](https://nodejs.org/).
 
 ## Usage
 

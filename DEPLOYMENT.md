@@ -2,12 +2,15 @@
 
 This guide covers deploying the frontend to Firebase Hosting and the backend to AWS EC2.
 
+> **Note**: For local installation from scratch, see [INSTALLATION.md](INSTALLATION.md)
+
 ---
 
 ## Frontend Deployment (Firebase Hosting)
 
 ### Prerequisites
 - Firebase account
+- Node.js and npm installed (see [INSTALLATION.md](INSTALLATION.md) if starting from scratch)
 - Firebase CLI installed globally
 
 ### Step 1: Install Firebase CLI
