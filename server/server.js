@@ -3,19 +3,19 @@ const cors = require('cors');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
 
 const app = express();
 const PORT = 3000;
 
-app.use(cors({
-  origin: ['http://localhost:5173', 'https://apple-site-clone-95524.web.app', 'https://www.pigsub.com'],
-  credentials: true
-}));
+app.use(cors());
 // Expose Content-Type header so client can read MIME type of blob
 app.use((req, res, next) => {
   res.header('Access-Control-Expose-Headers', 'Content-Type');
   next();
 });
+// app.use(express.json()); // Parsing handled by multer for multipart/form-data, but we might need it for other endpoints if any. 
+// Actually, for mixed use, we can keep it, but multer will handle the multipart request.
 app.use(express.json());
 
 // Ensure downloads directory exists
@@ -24,12 +24,25 @@ if (!fs.existsSync(downloadsDir)) {
   fs.mkdirSync(downloadsDir);
 }
 
-app.post('/download', (req, res) => {
+// Configure multer for handling file uploads
+const upload = multer({ dest: 'uploads/' });
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+app.post('/download', upload.single('cookies'), (req, res) => {
   console.log('Received download request:', req.body);
   const { url, start, end, videoId } = req.body;
+  const cookiesFile = req.file;
 
   // Basic validation of required fields
   if (!url || start === undefined || end === undefined || !videoId) {
+    if (cookiesFile) {
+        fs.unlink(cookiesFile.path, () => {}); // Clean up if validation fails
+    }
     return res.status(400).json({ error: 'Missing required fields: url, start, end, videoId' });
   }
 
@@ -37,6 +50,9 @@ app.post('/download', (req, res) => {
   const ytDlpPath = path.join(__dirname, 'yt-dlp');
   if (!fs.existsSync(ytDlpPath)) {
     console.error('yt-dlp binary not found at', ytDlpPath);
+    if (cookiesFile) {
+        fs.unlink(cookiesFile.path, () => {});
+    }
     return res.status(500).json({ error: 'Server configuration error: yt-dlp not found' });
   }
 
@@ -48,14 +64,21 @@ app.post('/download', (req, res) => {
   // yt-dlp command to download specific section
   // Note: Using the local binary ./yt-dlp
   // Using android client to bypass YouTube bot detection
-  const ytDlp = spawn('./yt-dlp', [
+  const args = [
     '--download-sections', `*${start}-${end}`,
     '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
     '--force-keyframes-at-cuts',
     '--extractor-args', 'youtube:player_client=android',
     '-o', outputPath,
     url
-  ]);
+  ];
+
+  if (cookiesFile) {
+      console.log(`Using cookies from ${cookiesFile.path}`);
+      args.push('--cookies', cookiesFile.path);
+  }
+
+  const ytDlp = spawn('./yt-dlp', args);
 
   ytDlp.stdout.on('data', (data) => {
     console.log(`stdout: ${data}`);
@@ -66,6 +89,13 @@ app.post('/download', (req, res) => {
   });
 
   ytDlp.on('close', (code) => {
+    // Clean up cookies file
+    if (cookiesFile) {
+        fs.unlink(cookiesFile.path, (err) => {
+            if (err) console.error('Error deleting cookies file:', err);
+        });
+    }
+
     if (code === 0) {
       console.log(`Download complete: ${outputPath}`);
       

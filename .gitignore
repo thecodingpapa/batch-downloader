@@ -2,3 +2,7 @@
 /fix-youtube-comprehensive.sh
 /sample_videos.txt
 /setup-https.sh
+
+# Local development
+*.pid
+*.log
