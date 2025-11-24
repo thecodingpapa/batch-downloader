@@ -3,6 +3,8 @@
 /sample_videos.txt
 /setup-https.sh
 
+batch-downloader.code-workspace
+
 # Local development
 *.pid
 *.log
