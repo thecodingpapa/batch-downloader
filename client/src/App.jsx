@@ -66,7 +66,7 @@ function App() {
             formData.append('cookies', cookiesFile);
           }
 
-          const response = await axios.post('https://api.pigsub.com/download', formData, {
+          const response = await axios.post('http://localhost:3000/download', formData, {
             responseType: 'blob',
             headers: {
               'Content-Type': 'multipart/form-data',
