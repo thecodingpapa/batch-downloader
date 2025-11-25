@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Batch Downloader</title>
+  <style>
+    body {font-family: Arial, sans-serif; margin: 2rem; line-height: 1.6; background: #f9f9f9; color: #333;}
+    h1, h2, h3 {color: #2c3e50;}
+    pre {background: #eee; padding: 1rem; overflow-x: auto;}
+    code {font-family: "Courier New", monospace;}
+    .section {margin-bottom: 2rem;}
+    iframe {border: none; max-width: 100%;}
+  </style>
+</head>
+<body>
+  <div class="section">
+    <h1>Batch Downloader</h1>
+    <p>A web application to batch download YouTube video clips with custom start and end times.</p>
+  </div>
+
+  <div class="section">
+    <h2>Demo Video</h2>
+    <iframe src="https://drive.google.com/file/d/18QV4DFb65qqbL0YDA053ag-gYMAP58ed/preview" width="640" height="480" allow="autoplay"></iframe>
+  </div>
+
+  <div class="section">
+    <h2>Quick Start (No Prerequisites Required!)</h2>
+    <p>The installation script will automatically install Node.js and all dependencies if they're not already on your system.</p>
+    <h3>1. Download the project</h3>
+    <ol>
+      <li>Download the ZIP file: <a href="https://github.com/thecodingpapa/batch-downloader/archive/refs/heads/main.zip">batch-downloader-main.zip</a></li>
+      <li>Extract the ZIP file</li>
+      <li><strong>Open Terminal</strong>:
+        <ul>
+          <li>Press <code>Command + Space</code> to open Spotlight Search.</li>
+          <li>Type <code>Terminal</code> and press <code>Enter</code>.</li>
+        </ul>
+      </li>
+      <li><strong>Navigate to the project folder</strong>:
+        <pre><code>cd /path/to/batch-downloader-main</code></pre>
+      </li>
+    </ol>
+    <h3>2. Run the installation script</h3>
+    <pre><code>chmod +x install-batch-downloader.sh
+./install-batch-downloader.sh</code></pre>
+    <p><strong>What this script does:</strong></p>
+    <ul>
+      <li>Detects your operating system (macOS, Linux, or Windows)</li>
+      <li>Installs Node.js and npm if not already installed</li>
+      <li>Installs all client and server dependencies</li>
+      <li>Verifies everything is set up correctly</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Usage</h2>
+    <h3>Start the application</h3>
+    <pre><code>./run-batch-downloader.sh</code></pre>
+    <p>This will start:</p>
+    <ul>
+      <li>Server on <code>http://localhost:3000</code></li>
+      <li>Client on <code>http://localhost:5174</code></li>
+    </ul>
+    <h3>Access the application</h3>
+    <p>Open your browser to: <strong>http://localhost:5174/</strong></p>
+    <h3>Stop the application</h3>
+    <pre><code>./stop-batch-downloader.sh</code></pre>
+  </div>
+
+  <div class="section">
+    <h2>Features</h2>
+    <ul>
+      <li>Drag and drop text file with YouTube URLs and timestamps</li>
+      <li>Select multiple clips to download</li>
+      <li>Batch download functionality</li>
+      <li>Cookie support for authentication (server-side)</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Logs</h2>
+    <p>View real-time logs:</p>
+    <pre><code>tail -f server.log  # Server logs
+tail -f client.log  # Client logs</code></pre>
+  </div>
+
+  <div class="section">
+    <h2>Deployment</h2>
+    <p>See <a href="DEPLOYMENT.md">DEPLOYMENT.md</a> for production deployment instructions.</p>
+  </div>
+</body>
+</html>
