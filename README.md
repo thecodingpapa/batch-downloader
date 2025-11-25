@@ -2,6 +2,11 @@
 
 A web application to batch download YouTube video clips with custom start and end times.
 
+## Demo Video
+
+<iframe src="https://drive.google.com/file/d/18QV4DFb65qqbL0YDA053ag-gYMAP58ed/preview" width="640" height="480" allow="autoplay"></iframe>
+
+
 ## Quick Start (No Prerequisites Required!)
 
 The installation script will automatically install Node.js and all dependencies if they're not already on your system.
