@@ -10,10 +10,15 @@ The installation script will automatically install Node.js and all dependencies 
 
 1. Download the ZIP file: [batch-downloader-main.zip](https://github.com/thecodingpapa/batch-downloader/archive/refs/heads/main.zip)
 2. Extract the ZIP file
-3. Open terminal and navigate to the extracted folder:
-   ```bash
-   cd batch-downloader-main
-   ```
+3. **Open Terminal**:
+   - Press `Command + Space` to open Spotlight Search.
+   - Type `Terminal` and press `Enter`.
+
+4. **Navigate to the project folder**:
+   - In the Terminal window, type `cd` followed by a space (don't press Enter yet).
+   - **Drag and drop** the extracted `batch-downloader-main` folder from Finder into the Terminal window.
+   - It should look something like: `cd /Users/yourname/Downloads/batch-downloader-main`
+   - Press `Enter`.
 
 ### 2. Run the installation script
 

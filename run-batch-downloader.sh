@@ -1,13 +1,37 @@
-#!/bin/bash
+# Define ports
+SERVER_PORT=3000
+CLIENT_PORT=5174
 
-# Script to run both client and server for batch-downloader
+# Function to kill process on a specific port
+kill_port() {
+  local port=$1
+  local name=$2
+  echo "🔍 Checking for existing $name on port $port..."
+  
+  # Find PID using lsof
+  local pid=$(lsof -ti :$port)
+  
+  if [ -n "$pid" ]; then
+    echo "⚠️  Found process $pid on port $port. Killing it..."
+    kill -9 $pid
+    echo "✅ Process $pid killed."
+  else
+    echo "✅ No existing process found on port $port."
+  fi
+}
 
 echo "🚀 Starting Batch Downloader..."
 
+# Kill existing processes
+kill_port $SERVER_PORT "Server"
+kill_port $CLIENT_PORT "Client"
+
+echo "-----------------------------------"
+
 # Start server in background
-echo "📡 Starting server on port 3000..."
+echo "📡 Starting server on port $SERVER_PORT..."
 cd server
-node server.js > ../server.log 2>&1 &
+PORT=$SERVER_PORT node server.js > ../server.log 2>&1 &
 SERVER_PID=$!
 echo $SERVER_PID > ../server.pid
 cd ..
@@ -16,17 +40,17 @@ cd ..
 sleep 2
 
 # Start client in background
-echo "🌐 Starting client on port 5174..."
+echo "🌐 Starting client on port $CLIENT_PORT..."
 cd client
-PORT=5174 npm run dev > ../client.log 2>&1 &
+PORT=$CLIENT_PORT npm run dev > ../client.log 2>&1 &
 CLIENT_PID=$!
 echo $CLIENT_PID > ../client.pid
 cd ..
 
 echo ""
 echo "✅ Batch Downloader is running!"
-echo "   Server: http://localhost:3000 (PID: $SERVER_PID)"
-echo "   Client: http://localhost:5174 (PID: $CLIENT_PID)"
+echo "   Server: http://localhost:$SERVER_PORT (PID: $SERVER_PID)"
+echo "   Client: http://localhost:$CLIENT_PORT (PID: $CLIENT_PID)"
 echo ""
 echo "📝 Logs:"
 echo "   Server: tail -f server.log"

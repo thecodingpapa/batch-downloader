@@ -6,7 +6,7 @@ const fs = require('fs');
 const multer = require('multer');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 // Expose Content-Type header so client can read MIME type of blob
