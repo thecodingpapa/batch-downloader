@@ -19,6 +19,8 @@ node --version
 
 If you need to upgrade, see the [Troubleshooting Guide](TROUBLESHOOTING.md#issue-nodejs-version-too-old).
 
+> **Tip:** After upgrading Node.js, you can run `./check-node-version.sh` to verify the new version is active in your terminal.
+
 ## Quick Start (No Prerequisites Required!)
 
 The installation script will automatically install Node.js and all dependencies if they're not already on your system.

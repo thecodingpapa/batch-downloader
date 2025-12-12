@@ -94,6 +94,8 @@ Your Node.js version is too old. Vite (the build tool used by the client) requir
    ./run-batch-downloader.sh
    ```
 
+> **Note:** After upgrading Node.js, your terminal session may still use the old version due to shell caching. If the install script detects this, it will ask you to close the terminal and open a new one. This is normal behavior.
+
 #### Issue: "vite: command not found" or "command not found" errors
 
 **Symptoms:**

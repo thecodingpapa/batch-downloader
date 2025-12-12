@@ -160,9 +160,60 @@ if [ "$VERSION_OK" = false ]; then
                 if [ $? -eq 0 ]; then
                     echo ""
                     echo "✅ Node.js upgraded successfully!"
+                    echo ""
                     
-                    # Verify new version
-                    NEW_NODE_VERSION=$(node --version)
+                    # Clear the command hash table to use the new node binary
+                    hash -r
+                    
+                    # Try to reload shell environment
+                    if [[ $(uname -m) == 'arm64' ]]; then
+                        # Apple Silicon Mac
+                        export PATH="/opt/homebrew/bin:$PATH"
+                        BREW_NODE="/opt/homebrew/bin/node"
+                    else
+                        # Intel Mac
+                        export PATH="/usr/local/bin:$PATH"
+                        BREW_NODE="/usr/local/bin/node"
+                    fi
+                    
+                    # Verify new version - try multiple methods
+                    NEW_NODE_VERSION=$(node --version 2>/dev/null)
+                    
+                    # If node command still shows old version, try explicit Homebrew path
+                    if [ -z "$NEW_NODE_VERSION" ] || [[ "$NEW_NODE_VERSION" == "$NODE_VERSION" ]]; then
+                        if [ -f "$BREW_NODE" ]; then
+                            NEW_NODE_VERSION=$($BREW_NODE --version 2>/dev/null)
+                            # Update PATH to prioritize Homebrew node
+                            export PATH="$(dirname $BREW_NODE):$PATH"
+                            hash -r
+                        fi
+                    fi
+                    
+                    if [ -z "$NEW_NODE_VERSION" ]; then
+                        echo "⚠️  Warning: Cannot detect new Node.js version in current shell"
+                        echo ""
+                        echo "   The upgrade completed, but your current terminal session"
+                        echo "   is still using the old Node.js version."
+                        echo ""
+                        echo "   Please close this terminal and open a new one, then run:"
+                        echo "   ./install-batch-downloader.sh"
+                        echo ""
+                        exit 1
+                    fi
+                    
+                    # Check if we're still seeing the old version
+                    if [[ "$NEW_NODE_VERSION" == "$NODE_VERSION" ]]; then
+                        echo "⚠️  Warning: Terminal is still using old Node.js version"
+                        echo ""
+                        echo "   Homebrew upgrade completed, but your current terminal"
+                        echo "   session needs to be restarted to use the new version."
+                        echo ""
+                        echo "   Please close this terminal and open a new one, then run:"
+                        echo "   ./install-batch-downloader.sh"
+                        echo ""
+                        exit 1
+                    fi
+                    
                     echo "   New version: $NEW_NODE_VERSION"
                     echo ""
                     
@@ -183,6 +234,9 @@ if [ "$VERSION_OK" = false ]; then
                         echo "⚠️  Warning: Upgraded version $NEW_NODE_VERSION is still not compatible"
                         echo "   Please install Node.js 20.19+ or 22.12+ manually from:"
                         echo "   https://nodejs.org/"
+                        echo ""
+                        echo "   After installing, close this terminal, open a new one, and run:"
+                        echo "   ./install-batch-downloader.sh"
                         exit 1
                     fi
                 else
