@@ -46,6 +46,8 @@ chmod +x install-batch-downloader.sh
 
 **What this script does:**
 - Detects your operating system (macOS, Linux, or Windows)
+- Checks Node.js version compatibility (requires 20.19+ or 22.12+)
+- **Automatically offers to upgrade Node.js if needed (macOS with Homebrew)**
 - Installs Node.js and npm if not already installed
   - **macOS**: Installs via Homebrew (installs Homebrew first if needed)
   - **Linux**: Installs via package manager (apt/yum)
@@ -53,7 +55,7 @@ chmod +x install-batch-downloader.sh
 - Installs all client and server dependencies
 - Verifies everything is set up correctly
 
-> **Note**: On macOS, if Homebrew is not installed, you'll be prompted to install it first. On Windows, you'll need to manually download and install Node.js from [nodejs.org](https://nodejs.org/).
+> **Note**: On macOS with Homebrew, the script can automatically upgrade Node.js for you. On other platforms, you'll need to upgrade manually if your version is too old.
 
 ## Usage
 

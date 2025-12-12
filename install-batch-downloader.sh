@@ -139,30 +139,102 @@ fi
 
 if [ "$VERSION_OK" = false ]; then
     echo ""
-    echo "❌ Error: Node.js version $NODE_VERSION is not compatible"
+    echo "⚠️  Node.js version $NODE_VERSION is not compatible"
     echo ""
     echo "   Vite requires Node.js version 20.19+ or 22.12+"
     echo "   Your version: $NODE_VERSION"
     echo ""
-    echo "   Please upgrade Node.js:"
-    echo ""
+    
+    # Offer to upgrade automatically
     if [[ "$OS" == "mac" ]]; then
-        echo "   Option 1 - Using Homebrew (recommended):"
-        echo "      brew upgrade node"
-        echo ""
-        echo "   Option 2 - Download from official website:"
-        echo "      https://nodejs.org/"
+        if command -v brew &> /dev/null; then
+            echo "Would you like to upgrade Node.js now using Homebrew?"
+            read -p "Upgrade Node.js? (y/n): " -n 1 -r
+            echo ""
+            
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                echo ""
+                echo "📦 Upgrading Node.js via Homebrew..."
+                brew upgrade node
+                
+                if [ $? -eq 0 ]; then
+                    echo ""
+                    echo "✅ Node.js upgraded successfully!"
+                    
+                    # Verify new version
+                    NEW_NODE_VERSION=$(node --version)
+                    echo "   New version: $NEW_NODE_VERSION"
+                    echo ""
+                    
+                    # Re-check version
+                    NODE_MAJOR_VERSION=$(echo $NEW_NODE_VERSION | cut -d'.' -f1 | sed 's/v//')
+                    NODE_MINOR_VERSION=$(echo $NEW_NODE_VERSION | cut -d'.' -f2)
+                    
+                    VERSION_OK=false
+                    if [ "$NODE_MAJOR_VERSION" -gt 22 ]; then
+                        VERSION_OK=true
+                    elif [ "$NODE_MAJOR_VERSION" -eq 22 ] && [ "$NODE_MINOR_VERSION" -ge 12 ]; then
+                        VERSION_OK=true
+                    elif [ "$NODE_MAJOR_VERSION" -eq 20 ] && [ "$NODE_MINOR_VERSION" -ge 19 ]; then
+                        VERSION_OK=true
+                    fi
+                    
+                    if [ "$VERSION_OK" = false ]; then
+                        echo "⚠️  Warning: Upgraded version $NEW_NODE_VERSION is still not compatible"
+                        echo "   Please install Node.js 20.19+ or 22.12+ manually from:"
+                        echo "   https://nodejs.org/"
+                        exit 1
+                    fi
+                else
+                    echo ""
+                    echo "❌ Failed to upgrade Node.js via Homebrew"
+                    echo "   Please upgrade manually from: https://nodejs.org/"
+                    exit 1
+                fi
+            else
+                echo ""
+                echo "❌ Node.js upgrade declined."
+                echo "   Please upgrade Node.js manually and run this script again."
+                echo ""
+                echo "   Download from: https://nodejs.org/"
+                exit 1
+            fi
+        else
+            echo "   Homebrew not found. Please upgrade Node.js manually:"
+            echo ""
+            echo "   Option 1 - Install Homebrew first, then upgrade:"
+            echo "      /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+            echo "      brew install node"
+            echo ""
+            echo "   Option 2 - Download from official website:"
+            echo "      https://nodejs.org/"
+            echo ""
+            exit 1
+        fi
     elif [[ "$OS" == "linux" ]]; then
-        echo "   Using NodeSource repository:"
-        echo "      curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -"
-        echo "      sudo apt-get install -y nodejs"
+        echo "   To upgrade Node.js on Linux:"
         echo ""
-        echo "   Or download from: https://nodejs.org/"
+        if [ -f /etc/debian_version ]; then
+            echo "   For Debian/Ubuntu:"
+            echo "      curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -"
+            echo "      sudo apt-get install -y nodejs"
+        elif [ -f /etc/redhat-release ]; then
+            echo "   For RedHat/CentOS/Fedora:"
+            echo "      curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -"
+            echo "      sudo yum install -y nodejs"
+        else
+            echo "   Download from: https://nodejs.org/"
+        fi
+        echo ""
+        echo "   After upgrading, run this script again."
+        exit 1
     else
-        echo "   Download from: https://nodejs.org/"
+        echo "   Please download and install Node.js 20.19+ or 22.12+ from:"
+        echo "   https://nodejs.org/"
+        echo ""
+        echo "   After installing, run this script again."
+        exit 1
     fi
-    echo ""
-    exit 1
 fi
 
 echo "✅ Node.js version is compatible"
