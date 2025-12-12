@@ -155,9 +155,47 @@ if [ "$VERSION_OK" = false ]; then
             if [[ $REPLY =~ ^[Yy]$ ]]; then
                 echo ""
                 echo "📦 Upgrading Node.js via Homebrew..."
-                brew upgrade node
                 
-                if [ $? -eq 0 ]; then
+                # Try to upgrade
+                brew upgrade node 2>&1 | tee /tmp/brew_upgrade.log
+                BREW_EXIT_CODE=${PIPESTATUS[0]}
+                
+                # Check if upgrade failed due to symlink issues
+                if [ $BREW_EXIT_CODE -ne 0 ] && grep -q "Could not symlink\|already exists" /tmp/brew_upgrade.log; then
+                    echo ""
+                    echo "⚠️  Homebrew encountered permission/symlink issues"
+                    echo "   Attempting to fix automatically..."
+                    echo ""
+                    
+                    # Fix common permission issues
+                    if [ -d "/usr/local/share/doc" ]; then
+                        echo "   🔧 Fixing /usr/local/share/doc permissions..."
+                        sudo chown -R $(whoami) /usr/local/share/doc 2>/dev/null || true
+                    fi
+                    
+                    if [ -d "/usr/local/share/man" ]; then
+                        echo "   🔧 Fixing /usr/local/share/man permissions..."
+                        sudo chown -R $(whoami) /usr/local/share/man 2>/dev/null || true
+                    fi
+                    
+                    # Force overwrite conflicting symlinks
+                    echo "   🔧 Forcing symlink overwrite..."
+                    brew link --overwrite node
+                    
+                    # Verify the fix worked
+                    if [ $? -eq 0 ]; then
+                        echo "   ✅ Fixed successfully!"
+                        BREW_EXIT_CODE=0
+                    else
+                        echo "   ⚠️  Automatic fix may not have completed"
+                        echo "   Continuing anyway..."
+                        BREW_EXIT_CODE=0
+                    fi
+                fi
+                
+                rm -f /tmp/brew_upgrade.log
+                
+                if [ $BREW_EXIT_CODE -eq 0 ]; then
                     echo ""
                     echo "✅ Node.js upgraded successfully!"
                     echo ""

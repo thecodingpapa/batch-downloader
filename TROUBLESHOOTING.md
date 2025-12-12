@@ -94,6 +94,43 @@ Your Node.js version is too old. Vite (the build tool used by the client) requir
    ./run-batch-downloader.sh
    ```
 
+#### Issue: Homebrew Symlink/Permission Errors During Upgrade
+
+**Symptoms:**
+- Error during `brew upgrade node`: "The brew link step did not complete successfully"
+- Error: "Could not symlink share/doc/node/gdbinit"
+- Error: "Target /usr/local/share/doc/node/gdbinit already exists"
+
+**Root Cause:**
+Homebrew directories have incorrect ownership or conflicting symlinks from previous installations.
+
+**Solution:**
+
+The install script now **automatically detects and fixes** this issue. If you see this error, the script will:
+1. Fix permissions on `/usr/local/share/doc` and `/usr/local/share/man`
+2. Force overwrite conflicting symlinks with `brew link --overwrite node`
+
+**Manual Fix (if needed):**
+
+If the automatic fix doesn't work, run these commands:
+
+```bash
+# Fix permissions
+sudo chown -R $(whoami) /usr/local/share/doc
+sudo chown -R $(whoami) /usr/local/share/man
+
+# Force overwrite symlinks
+brew link --overwrite node
+
+# Verify
+node --version
+```
+
+Then run the install script again:
+```bash
+./install-batch-downloader.sh
+```
+
 > **Note:** After upgrading Node.js, your terminal session may still use the old version due to shell caching. If the install script detects this, it will ask you to close the terminal and open a new one. This is normal behavior.
 
 #### Issue: Node.js Version Still Old After Closing Terminal
