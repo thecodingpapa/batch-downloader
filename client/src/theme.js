@@ -2,21 +2,21 @@ import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
   palette: {
-    mode: 'light',
+    mode: 'dark',
     primary: {
-      main: '#2563eb', // Blue-600
-      light: '#3b82f6',
-      dark: '#1d4ed8',
+      main: '#3b82f6', // Blue-500
+      light: '#60a5fa',
+      dark: '#2563eb',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#9333ea', // Purple-600
-      light: '#a855f7',
-      dark: '#7e22ce',
+      main: '#a855f7', // Purple-500
+      light: '#c084fc',
+      dark: '#9333ea',
       contrastText: '#ffffff',
     },
     error: {
-      main: '#dc2626',
+      main: '#ef4444',
     },
     warning: {
       main: '#f59e0b',
@@ -25,12 +25,12 @@ const theme = createTheme({
       main: '#10b981',
     },
     background: {
-      default: '#f8fafc',
-      paper: '#ffffff',
+      default: '#0f172a', // Slate-900
+      paper: '#1e293b', // Slate-800
     },
     text: {
-      primary: '#0f172a',
-      secondary: '#64748b',
+      primary: '#f1f5f9', // Slate-100
+      secondary: '#94a3b8', // Slate-400
     },
   },
   typography: {
@@ -78,30 +78,30 @@ const theme = createTheme({
   },
   shadows: [
     'none',
-    '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-    '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-    '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-    '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-    '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    '0 25px 50px -12px rgb(0 0 0 / 0.25)',
+    '0 1px 2px 0 rgb(0 0 0 / 0.3)',
+    '0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4)',
+    '0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4)',
+    '0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4)',
+    '0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
+    '0 25px 50px -12px rgb(0 0 0 / 0.6)',
   ],
   components: {
     MuiButton: {
@@ -112,12 +112,12 @@ const theme = createTheme({
           fontSize: '0.9375rem',
           boxShadow: 'none',
           '&:hover': {
-            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4)',
           },
         },
         contained: {
           '&:hover': {
-            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5)',
           },
         },
       },
@@ -126,11 +126,11 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 16,
-          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4)',
           transition: 'all 0.3s ease',
           '&:hover': {
             transform: 'translateY(-4px)',
-            boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+            boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5)',
           },
         },
       },

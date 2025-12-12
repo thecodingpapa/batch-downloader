@@ -8,3 +8,6 @@ batch-downloader.code-workspace
 # Local development
 *.pid
 *.log
+
+# SSL certificates (machine-specific, auto-generated)
+*.pem

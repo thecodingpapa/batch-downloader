@@ -22,6 +22,38 @@ kill_port() {
 
 echo "🚀 Starting Batch Downloader..."
 
+# Check for SSL certificates
+CERT_KEY="localhost+2-key.pem"
+CERT_FILE="localhost+2.pem"
+
+if [ ! -f "$CERT_KEY" ] || [ ! -f "$CERT_FILE" ]; then
+  echo ""
+  echo "🔐 SSL certificates not found. Setting up HTTPS..."
+  
+  # Check if mkcert is installed
+  if ! command -v mkcert &> /dev/null; then
+    echo "📦 Installing mkcert..."
+    if command -v brew &> /dev/null; then
+      brew install mkcert
+    else
+      echo "❌ Error: Homebrew not found. Please install mkcert manually:"
+      echo "   Visit: https://github.com/FiloSottile/mkcert"
+      exit 1
+    fi
+  fi
+  
+  # Install local CA
+  echo "🔑 Installing local Certificate Authority..."
+  mkcert -install
+  
+  # Generate certificates
+  echo "📜 Generating SSL certificates..."
+  mkcert localhost 127.0.0.1 ::1
+  
+  echo "✅ SSL certificates created successfully!"
+  echo ""
+fi
+
 # Kill existing processes
 kill_port $SERVER_PORT "Server"
 kill_port $CLIENT_PORT "Client"
@@ -49,8 +81,8 @@ cd ..
 
 echo ""
 echo "✅ Batch Downloader is running!"
-echo "   Server: http://localhost:$SERVER_PORT (PID: $SERVER_PID)"
-echo "   Client: http://localhost:$CLIENT_PORT (PID: $CLIENT_PID)"
+echo "   Server: https://localhost:$SERVER_PORT (PID: $SERVER_PID)"
+echo "   Client: https://localhost:$CLIENT_PORT (PID: $CLIENT_PID)"
 echo ""
 echo "📝 Logs:"
 echo "   Server: tail -f server.log"
