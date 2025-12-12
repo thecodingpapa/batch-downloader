@@ -114,6 +114,7 @@ For detailed solutions, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 - SSL certificate errors → Application will run in HTTP mode automatically
 - Port conflicts → Script automatically kills existing processes
 - "vite: command not found" → Run `./install-batch-downloader.sh`
+- **Node.js version still old after upgrade** → Run `./fix-node-path.sh`
 
 ## Deployment
 

@@ -96,6 +96,111 @@ Your Node.js version is too old. Vite (the build tool used by the client) requir
 
 > **Note:** After upgrading Node.js, your terminal session may still use the old version due to shell caching. If the install script detects this, it will ask you to close the terminal and open a new one. This is normal behavior.
 
+#### Issue: Node.js Version Still Old After Closing Terminal
+
+**Symptoms:**
+- Upgraded Node.js with Homebrew
+- Closed terminal and opened a new one
+- `node --version` still shows the old version (e.g., v18.17.1)
+- The problem persists across terminal restarts
+
+**Root Cause:**
+Your shell configuration file (`.zshrc` or `.bash_profile`) has an old Node.js path that takes priority over Homebrew's Node.js, OR you have a Node version manager (like `nvm`) that's overriding Homebrew.
+
+**Solution:**
+
+1. **Run the diagnostic tool:**
+   ```bash
+   ./fix-node-path.sh
+   ```
+   
+   This will:
+   - Show which Node.js version you're currently using
+   - Show where Homebrew's Node.js is installed
+   - Detect if nvm or other version managers are interfering
+   - Offer to automatically fix your shell configuration
+
+2. **If the tool offers to fix automatically, accept it:**
+   ```
+   Would you like me to add this automatically? (y/n): y
+   ```
+
+3. **Reload your shell configuration:**
+   ```bash
+   source ~/.zshrc  # if using zsh
+   # or
+   source ~/.bash_profile  # if using bash
+   ```
+
+4. **Verify the fix:**
+   ```bash
+   node --version
+   # Should now show v20.19+ or v22.12+
+   ```
+
+5. **Run the install script again:**
+   ```bash
+   ./install-batch-downloader.sh
+   ```
+
+**Alternative: Manual Fix**
+
+If you prefer to fix it manually:
+
+1. **Find Homebrew's Node.js location:**
+   ```bash
+   # Apple Silicon Mac
+   /opt/homebrew/bin/node --version
+   
+   # Intel Mac
+   /usr/local/bin/node --version
+   ```
+
+2. **Edit your shell configuration:**
+   ```bash
+   # For zsh (default on macOS)
+   nano ~/.zshrc
+   
+   # For bash
+   nano ~/.bash_profile
+   ```
+
+3. **Add this line at the TOP of the file:**
+   ```bash
+   # Apple Silicon Mac
+   export PATH="/opt/homebrew/bin:$PATH"
+   
+   # Intel Mac
+   export PATH="/usr/local/bin:$PATH"
+   ```
+
+4. **Save and reload:**
+   ```bash
+   source ~/.zshrc  # or ~/.bash_profile
+   ```
+
+**If you have nvm installed:**
+
+Check if nvm is in your shell config:
+```bash
+grep -n "nvm" ~/.zshrc ~/.bash_profile
+```
+
+If found, you have two options:
+
+**Option A: Use nvm to install Node.js 20+**
+```bash
+nvm install 20
+nvm use 20
+nvm alias default 20
+```
+
+**Option B: Remove nvm and use Homebrew**
+1. Remove nvm lines from your shell config file
+2. Delete nvm: `rm -rf ~/.nvm`
+3. Close terminal and open a new one
+4. Run `./install-batch-downloader.sh`
+
 #### Issue: "vite: command not found" or "command not found" errors
 
 **Symptoms:**

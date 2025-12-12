@@ -205,11 +205,57 @@ if [ "$VERSION_OK" = false ]; then
                     if [[ "$NEW_NODE_VERSION" == "$NODE_VERSION" ]]; then
                         echo "⚠️  Warning: Terminal is still using old Node.js version"
                         echo ""
-                        echo "   Homebrew upgrade completed, but your current terminal"
-                        echo "   session needs to be restarted to use the new version."
+                        echo "   This is likely due to your shell configuration."
+                        echo "   Let me fix this for you..."
                         echo ""
-                        echo "   Please close this terminal and open a new one, then run:"
-                        echo "   ./install-batch-downloader.sh"
+                        
+                        # Detect current shell and config file
+                        CURRENT_SHELL=$(basename "$SHELL")
+                        if [[ "$CURRENT_SHELL" == "zsh" ]]; then
+                            CONFIG_FILE="$HOME/.zshrc"
+                        else
+                            CONFIG_FILE="$HOME/.bash_profile"
+                        fi
+                        
+                        # Determine Homebrew prefix
+                        if [[ $(uname -m) == 'arm64' ]]; then
+                            BREW_PREFIX="/opt/homebrew"
+                        else
+                            BREW_PREFIX="/usr/local"
+                        fi
+                        
+                        # Backup config file
+                        if [ -f "$CONFIG_FILE" ]; then
+                            cp "$CONFIG_FILE" "$CONFIG_FILE.backup.$(date +%Y%m%d_%H%M%S)"
+                            echo "   📄 Backed up $CONFIG_FILE"
+                        fi
+                        
+                        # Add or update Homebrew path in config
+                        if [ -f "$CONFIG_FILE" ]; then
+                            # Remove old Homebrew path entries to avoid duplicates
+                            sed -i.tmp '/# Use Homebrew.*Node/d' "$CONFIG_FILE" 2>/dev/null
+                            sed -i.tmp '\|export PATH=".*/homebrew/bin:\$PATH"|d' "$CONFIG_FILE" 2>/dev/null
+                            rm -f "$CONFIG_FILE.tmp"
+                        fi
+                        
+                        # Add new Homebrew path at the beginning
+                        {
+                            echo ""
+                            echo "# Use Homebrew's Node.js (added by install-batch-downloader.sh)"
+                            echo "export PATH=\"$BREW_PREFIX/bin:\$PATH\""
+                        } >> "$CONFIG_FILE"
+                        
+                        echo "   ✅ Updated $CONFIG_FILE to use Homebrew's Node.js"
+                        echo ""
+                        echo "   The configuration has been fixed, but you need to reload it."
+                        echo ""
+                        echo "   Please run ONE of these commands:"
+                        echo ""
+                        echo "   Option 1 (Quick): Reload configuration in current terminal"
+                        echo "      source $CONFIG_FILE && ./install-batch-downloader.sh"
+                        echo ""
+                        echo "   Option 2 (Recommended): Close terminal, open new one, then run"
+                        echo "      ./install-batch-downloader.sh"
                         echo ""
                         exit 1
                     fi
