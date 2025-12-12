@@ -121,12 +121,47 @@ echo "   Node.js version: $NODE_VERSION"
 echo "   npm version: $NPM_VERSION"
 echo ""
 
-# Check Node.js version (require v18 or higher)
+# Check Node.js version (require v20.19+ or v22.12+)
 NODE_MAJOR_VERSION=$(echo $NODE_VERSION | cut -d'.' -f1 | sed 's/v//')
-if [ "$NODE_MAJOR_VERSION" -lt 18 ]; then
-    echo "⚠️  Warning: Node.js version $NODE_VERSION detected."
-    echo "   This application requires Node.js v18 or higher."
-    echo "   Please update Node.js from: https://nodejs.org/"
+NODE_MINOR_VERSION=$(echo $NODE_VERSION | cut -d'.' -f2)
+
+echo "🔍 Checking Node.js version compatibility..."
+
+VERSION_OK=false
+
+if [ "$NODE_MAJOR_VERSION" -gt 22 ]; then
+    VERSION_OK=true
+elif [ "$NODE_MAJOR_VERSION" -eq 22 ] && [ "$NODE_MINOR_VERSION" -ge 12 ]; then
+    VERSION_OK=true
+elif [ "$NODE_MAJOR_VERSION" -eq 20 ] && [ "$NODE_MINOR_VERSION" -ge 19 ]; then
+    VERSION_OK=true
+fi
+
+if [ "$VERSION_OK" = false ]; then
+    echo ""
+    echo "❌ Error: Node.js version $NODE_VERSION is not compatible"
+    echo ""
+    echo "   Vite requires Node.js version 20.19+ or 22.12+"
+    echo "   Your version: $NODE_VERSION"
+    echo ""
+    echo "   Please upgrade Node.js:"
+    echo ""
+    if [[ "$OS" == "mac" ]]; then
+        echo "   Option 1 - Using Homebrew (recommended):"
+        echo "      brew upgrade node"
+        echo ""
+        echo "   Option 2 - Download from official website:"
+        echo "      https://nodejs.org/"
+    elif [[ "$OS" == "linux" ]]; then
+        echo "   Using NodeSource repository:"
+        echo "      curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -"
+        echo "      sudo apt-get install -y nodejs"
+        echo ""
+        echo "   Or download from: https://nodejs.org/"
+    else
+        echo "   Download from: https://nodejs.org/"
+    fi
+    echo ""
     exit 1
 fi
 
@@ -152,6 +187,14 @@ if [ $? -ne 0 ]; then
     echo "❌ Failed to install server dependencies"
     exit 1
 fi
+
+# Verify node_modules was created
+if [ ! -d "node_modules" ]; then
+    echo "❌ Error: node_modules directory was not created"
+    echo "   npm install may have failed silently"
+    exit 1
+fi
+
 echo "✅ Server dependencies installed"
 cd ..
 
@@ -176,6 +219,21 @@ if [ $? -ne 0 ]; then
     echo "❌ Failed to install client dependencies"
     exit 1
 fi
+
+# Verify node_modules was created
+if [ ! -d "node_modules" ]; then
+    echo "❌ Error: node_modules directory was not created"
+    echo "   npm install may have failed silently"
+    exit 1
+fi
+
+# Verify vite is installed (critical for client)
+if [ ! -f "node_modules/.bin/vite" ]; then
+    echo "❌ Error: vite was not installed properly"
+    echo "   This is required to run the client"
+    exit 1
+fi
+
 echo "✅ Client dependencies installed"
 cd ..
 

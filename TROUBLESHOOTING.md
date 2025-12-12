@@ -4,6 +4,26 @@
 
 If the client fails to start when running `./run-batch-downloader.sh`, follow these steps:
 
+### 0. Run the Diagnostic Script (Recommended First Step)
+
+Before diving into logs, run the diagnostic script to get a complete overview:
+
+```bash
+chmod +x diagnose.sh
+./diagnose.sh
+```
+
+This will check:
+- Node.js and npm installation
+- Project structure
+- Dependencies (node_modules)
+- SSL certificates
+- Port availability
+- Running processes
+- Recent log entries
+
+The script will tell you exactly what's wrong and what to do.
+
 ### 1. Check the Client Logs
 
 ```bash
@@ -13,6 +33,108 @@ tail -f client.log
 This will show you the actual error message from the client startup process.
 
 ### 2. Common Issues and Solutions
+
+#### Issue: Node.js Version Too Old
+
+**Symptoms:**
+- Error message: "Vite requires Node.js version 20.19+ or 22.12+"
+- Error: `TypeError: crypto.hash is not a function`
+- Client fails to start with vite errors
+
+**Root Cause:**
+Your Node.js version is too old. Vite (the build tool used by the client) requires Node.js 20.19+ or 22.12+.
+
+**Solution:**
+
+1. **Check your current Node.js version:**
+   ```bash
+   node --version
+   ```
+
+2. **Upgrade Node.js:**
+
+   **macOS (using Homebrew):**
+   ```bash
+   brew upgrade node
+   ```
+
+   **macOS (manual download):**
+   - Visit https://nodejs.org/
+   - Download the LTS version (20.x or higher)
+   - Run the installer
+
+   **Linux (Ubuntu/Debian):**
+   ```bash
+   # Remove old version
+   sudo apt-get remove nodejs
+   
+   # Install Node.js 20.x
+   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+   sudo apt-get install -y nodejs
+   ```
+
+   **Windows:**
+   - Visit https://nodejs.org/
+   - Download the Windows installer
+   - Run the installer
+
+3. **Verify the new version:**
+   ```bash
+   node --version
+   # Should show v20.19.0 or higher, or v22.12.0 or higher
+   ```
+
+4. **Reinstall dependencies with the new Node.js version:**
+   ```bash
+   ./install-batch-downloader.sh
+   ```
+
+5. **Start the application:**
+   ```bash
+   ./run-batch-downloader.sh
+   ```
+
+#### Issue: "vite: command not found" or "command not found" errors
+
+**Symptoms:**
+- Client log shows: `sh: vite: command not found`
+- Error when running `npm run dev`
+- Client fails to start immediately
+
+**Root Cause:**
+Dependencies were not installed properly. The `node_modules` directory is missing or incomplete.
+
+**Solution:**
+
+1. **Run the installation script:**
+   ```bash
+   ./install-batch-downloader.sh
+   ```
+
+2. **If that fails, manually install client dependencies:**
+   ```bash
+   cd client
+   rm -rf node_modules package-lock.json
+   npm install
+   cd ..
+   ```
+
+3. **Verify vite is installed:**
+   ```bash
+   ls -la client/node_modules/.bin/vite
+   ```
+   
+   If this file doesn't exist, the installation failed.
+
+4. **Check for npm errors:**
+   - Make sure you have a stable internet connection
+   - Try clearing npm cache: `npm cache clean --force`
+   - Update npm: `npm install -g npm@latest`
+
+5. **Restart the application:**
+   ```bash
+   ./run-batch-downloader.sh
+   ```
 
 #### Issue: SSL Certificate Error
 

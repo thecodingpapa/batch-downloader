@@ -22,6 +22,30 @@ kill_port() {
 
 echo "🚀 Starting Batch Downloader..."
 
+# Check if dependencies are installed
+echo "🔍 Checking dependencies..."
+
+if [ ! -d "server/node_modules" ]; then
+  echo ""
+  echo "❌ Error: Server dependencies not found!"
+  echo "   Please run the installation script first:"
+  echo "   ./install-batch-downloader.sh"
+  echo ""
+  exit 1
+fi
+
+if [ ! -d "client/node_modules" ]; then
+  echo ""
+  echo "❌ Error: Client dependencies not found!"
+  echo "   Please run the installation script first:"
+  echo "   ./install-batch-downloader.sh"
+  echo ""
+  exit 1
+fi
+
+echo "✅ Dependencies verified"
+echo ""
+
 # Check for SSL certificates
 CERT_KEY="localhost+2-key.pem"
 CERT_FILE="localhost+2.pem"

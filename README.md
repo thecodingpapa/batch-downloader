@@ -6,6 +6,18 @@ A web application to batch download YouTube video clips with custom start and en
 
 <iframe src="https://drive.google.com/file/d/18QV4DFb65qqbL0YDA053ag-gYMAP58ed/preview" width="640" height="480" allow="autoplay"></iframe>
 
+## Requirements
+
+**Node.js Version:** 20.19+ or 22.12+
+
+> ⚠️ **Important:** This application uses Vite, which requires Node.js 20.19+ or 22.12+. If you have an older version (like 18.x), you **must** upgrade Node.js first.
+
+Check your version:
+```bash
+node --version
+```
+
+If you need to upgrade, see the [Troubleshooting Guide](TROUBLESHOOTING.md#issue-nodejs-version-too-old).
 
 ## Quick Start (No Prerequisites Required!)
 
@@ -83,12 +95,21 @@ tail -f client.log  # Client logs
 
 ## Troubleshooting
 
-If you encounter issues (especially with the client not starting), see [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for detailed solutions.
+If you encounter issues (especially with the client not starting), **first run the diagnostic script:**
+
+```bash
+./diagnose.sh
+```
+
+This will check your setup and identify any problems.
+
+For detailed solutions, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 
 **Common issues:**
 - Client not starting → Check `client.log` for errors
 - SSL certificate errors → Application will run in HTTP mode automatically
 - Port conflicts → Script automatically kills existing processes
+- "vite: command not found" → Run `./install-batch-downloader.sh`
 
 ## Deployment
 
