@@ -32,25 +32,44 @@ if [ ! -f "$CERT_KEY" ] || [ ! -f "$CERT_FILE" ]; then
   
   # Check if mkcert is installed
   if ! command -v mkcert &> /dev/null; then
-    echo "📦 Installing mkcert..."
+    echo "📦 mkcert not found. Attempting to install..."
     if command -v brew &> /dev/null; then
       brew install mkcert
+      if [ $? -ne 0 ]; then
+        echo "⚠️  Warning: Failed to install mkcert via Homebrew"
+        echo "   The application will run without HTTPS (HTTP only)"
+        echo ""
+      fi
     else
-      echo "❌ Error: Homebrew not found. Please install mkcert manually:"
-      echo "   Visit: https://github.com/FiloSottile/mkcert"
-      exit 1
+      echo "⚠️  Warning: Homebrew not found. Cannot auto-install mkcert."
+      echo "   The application will run without HTTPS (HTTP only)"
+      echo "   To enable HTTPS later, install mkcert from: https://github.com/FiloSottile/mkcert"
+      echo ""
     fi
   fi
   
-  # Install local CA
-  echo "🔑 Installing local Certificate Authority..."
-  mkcert -install
-  
-  # Generate certificates
-  echo "📜 Generating SSL certificates..."
-  mkcert localhost 127.0.0.1 ::1
-  
-  echo "✅ SSL certificates created successfully!"
+  # Try to generate certificates if mkcert is available
+  if command -v mkcert &> /dev/null; then
+    # Install local CA
+    echo "🔑 Installing local Certificate Authority..."
+    mkcert -install
+    
+    # Generate certificates
+    echo "📜 Generating SSL certificates..."
+    mkcert localhost 127.0.0.1 ::1
+    
+    # Verify certificates were created
+    if [ -f "$CERT_KEY" ] && [ -f "$CERT_FILE" ]; then
+      echo "✅ SSL certificates created successfully!"
+      echo ""
+    else
+      echo "⚠️  Warning: SSL certificate generation may have failed"
+      echo "   The application will run without HTTPS (HTTP only)"
+      echo ""
+    fi
+  fi
+else
+  echo "✅ SSL certificates found"
   echo ""
 fi
 
@@ -79,10 +98,16 @@ CLIENT_PID=$!
 echo $CLIENT_PID > ../client.pid
 cd ..
 
+# Determine protocol based on certificate availability
+PROTOCOL="http"
+if [ -f "$CERT_KEY" ] && [ -f "$CERT_FILE" ]; then
+  PROTOCOL="https"
+fi
+
 echo ""
 echo "✅ Batch Downloader is running!"
 echo "   Server: https://localhost:$SERVER_PORT (PID: $SERVER_PID)"
-echo "   Client: https://localhost:$CLIENT_PORT (PID: $CLIENT_PID)"
+echo "   Client: $PROTOCOL://localhost:$CLIENT_PORT (PID: $CLIENT_PID)"
 echo ""
 echo "📝 Logs:"
 echo "   Server: tail -f server.log"

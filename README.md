@@ -81,6 +81,15 @@ tail -f server.log  # Server logs
 tail -f client.log  # Client logs
 ```
 
+## Troubleshooting
+
+If you encounter issues (especially with the client not starting), see [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for detailed solutions.
+
+**Common issues:**
+- Client not starting → Check `client.log` for errors
+- SSL certificate errors → Application will run in HTTP mode automatically
+- Port conflicts → Script automatically kills existing processes
+
 ## Deployment
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for production deployment instructions.
