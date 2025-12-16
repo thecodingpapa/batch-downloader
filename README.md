@@ -4,7 +4,9 @@ A web application to batch download YouTube video clips with custom start and en
 
 ## Demo Video
 
-<iframe src="https://drive.google.com/file/d/18QV4DFb65qqbL0YDA053ag-gYMAP58ed/preview" width="640" height="480" allow="autoplay"></iframe>
+**[▶️ Watch Demo Video](https://drive.google.com/file/d/18QV4DFb65qqbL0YDA053ag-gYMAP58ed/view)**
+
+Click the link above to see the application in action.
 
 ## Requirements
 
@@ -60,32 +62,23 @@ chmod +x install-batch-downloader.sh
 
 > **Note**: On macOS with Homebrew, the script can automatically upgrade Node.js and fix common permission issues for you. On other platforms, you'll need to upgrade manually if your version is too old.
 
-### 3. Generate SSL Certificate for HTTPS (Optional)
+### 3. Install Homebrew (if not already installed)
 
-If you need to run the client app with HTTPS (for localhost development), generate a local SSL certificate using `mkcert`.
-
-**First, ensure Homebrew is installed:**
+Homebrew is required for SSL certificate generation. Check if it's installed:
 
 ```bash
 # Check if Homebrew is installed
 brew --version
 
-# If not installed, install Homebrew first:
+# If not installed, install Homebrew:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# For Apple Silicon Macs (M1/M2/M3), add Homebrew to PATH:
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+eval "$(/opt/homebrew/bin/brew shellenv)"
 ```
 
-**Then, generate the SSL certificate:**
-
-```bash
-brew install mkcert nss && mkcert -install && mkcert localhost 127.0.0.1 ::1 && echo "✅ Certificate created!"
-```
-
-**What this does:**
-- Installs `mkcert` and `nss` (for Firefox support) via Homebrew
-- Installs a local Certificate Authority
-- Generates trusted SSL certificates for localhost (`localhost+2.pem` and `localhost+2-key.pem`)
-
-> **Note**: This step is optional and only needed if your application requires HTTPS. The application will work fine with HTTP for local development.
+> **Note**: After installing Homebrew, you may need to restart your terminal or run the PATH commands above to use `brew`.
 
 ## Usage
 
