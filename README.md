@@ -60,6 +60,21 @@ chmod +x install-batch-downloader.sh
 
 > **Note**: On macOS with Homebrew, the script can automatically upgrade Node.js and fix common permission issues for you. On other platforms, you'll need to upgrade manually if your version is too old.
 
+### 3. Generate SSL Certificate for HTTPS (Optional)
+
+If you need to run the client app with HTTPS (for localhost development), generate a local SSL certificate:
+
+```bash
+brew install mkcert nss && mkcert -install && mkcert localhost 127.0.0.1 ::1 && echo "✅ Certificate created!"
+```
+
+**What this does:**
+- Installs `mkcert` and `nss` (for Firefox support)
+- Installs the local Certificate Authority
+- Generates SSL certificates for localhost (`localhost+2.pem` and `localhost+2-key.pem`)
+
+> **Note**: This step is optional and only needed if your application requires HTTPS. The application will work fine with HTTP for local development.
+
 ## Usage
 
 ### Start the application
