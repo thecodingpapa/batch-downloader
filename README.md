@@ -65,13 +65,15 @@ chmod +x install-batch-downloader.sh
 If you need to run the client app with HTTPS (for localhost development), generate a local SSL certificate:
 
 ```bash
-brew install mkcert nss && mkcert -install && mkcert localhost 127.0.0.1 ::1 && echo "✅ Certificate created!"
+openssl req -x509 -newkey rsa:4096 -keyout localhost-key.pem -out localhost-cert.pem -days 365 -nodes -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1" && sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain localhost-cert.pem && echo "✅ Certificate created and trusted!"
 ```
 
 **What this does:**
-- Installs `mkcert` and `nss` (for Firefox support)
-- Installs the local Certificate Authority
-- Generates SSL certificates for localhost (`localhost+2.pem` and `localhost+2-key.pem`)
+- Generates a self-signed SSL certificate valid for 365 days
+- Creates `localhost-cert.pem` (certificate) and `localhost-key.pem` (private key)
+- Automatically trusts the certificate in your macOS Keychain
+
+> **Note**: You'll be prompted for your password to add the certificate to the system keychain. This is normal and required to trust the certificate.
 
 > **Note**: This step is optional and only needed if your application requires HTTPS. The application will work fine with HTTP for local development.
 
