@@ -410,7 +410,6 @@ echo "✅ Server dependencies installed"
 # Install standalone yt-dlp binary
 echo ""
 echo "📥 Installing yt-dlp binary..."
-cd server
 
 # Define download URLs
 YTDLP_BASE_URL="https://github.com/yt-dlp/yt-dlp/releases/latest/download"
