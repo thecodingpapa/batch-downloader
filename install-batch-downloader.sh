@@ -406,6 +406,41 @@ if [ ! -d "node_modules" ]; then
 fi
 
 echo "✅ Server dependencies installed"
+
+# Install standalone yt-dlp binary
+echo ""
+echo "📥 Installing yt-dlp binary..."
+cd server
+
+# Define download URLs
+YTDLP_BASE_URL="https://github.com/yt-dlp/yt-dlp/releases/latest/download"
+
+if [[ "$OS" == "mac" ]]; then
+    echo "   🍎 Downloading yt-dlp for macOS..."
+    curl -L "$YTDLP_BASE_URL/yt-dlp_macos" -o yt-dlp
+    chmod +x yt-dlp
+    # Remove quarantine attribute to prevent "Killed: 9" error on macOS
+    xattr -d com.apple.quarantine yt-dlp 2>/dev/null || true
+elif [[ "$OS" == "linux" ]]; then
+    echo "   🐧 Downloading yt-dlp for Linux..."
+    curl -L "$YTDLP_BASE_URL/yt-dlp" -o yt-dlp
+    chmod +x yt-dlp
+elif [[ "$OS" == "windows" ]]; then
+    echo "   🪟 Downloading yt-dlp for Windows..."
+    curl -L "$YTDLP_BASE_URL/yt-dlp.exe" -o yt-dlp.exe
+else
+    echo "   ⚠️  Could not determine OS for yt-dlp download."
+    echo "   You may need to download it manually: https://github.com/yt-dlp/yt-dlp/releases"
+fi
+
+# Verify installation
+if [ -f "yt-dlp" ] || [ -f "yt-dlp.exe" ]; then
+    echo "   ✅ yt-dlp binary installed successfully"
+else
+    echo "   ❌ Failed to download yt-dlp binary"
+    # We don't exit here to allow the script to continue, but server might fail later
+fi
+
 cd ..
 
 echo ""
