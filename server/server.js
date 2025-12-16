@@ -48,7 +48,9 @@ app.post('/download', upload.single('cookies'), (req, res) => {
   }
 
   // Ensure yt-dlp binary exists before proceeding
-  const ytDlpPath = path.join(__dirname, 'yt-dlp');
+  const ytDlpBinary = process.platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp';
+  const ytDlpPath = path.join(__dirname, ytDlpBinary);
+  
   if (!fs.existsSync(ytDlpPath)) {
     console.error('yt-dlp binary not found at', ytDlpPath);
     if (cookiesFile) {
@@ -63,7 +65,7 @@ app.post('/download', upload.single('cookies'), (req, res) => {
   console.log(`Starting download for ${videoId}: ${start}s - ${end}s`);
 
   // yt-dlp command to download specific section
-  // Note: Using the local binary ./yt-dlp
+  // Note: Using the local binary
   // Using android client to bypass YouTube bot detection
   const args = [
     '--download-sections', `*${start}-${end}`,
@@ -79,7 +81,7 @@ app.post('/download', upload.single('cookies'), (req, res) => {
       args.push('--cookies', cookiesFile.path);
   }
 
-  const ytDlp = spawn('./yt-dlp', args);
+  const ytDlp = spawn(`./${ytDlpBinary}`, args, { cwd: __dirname });
 
   ytDlp.stdout.on('data', (data) => {
     console.log(`stdout: ${data}`);
