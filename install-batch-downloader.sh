@@ -35,9 +35,9 @@ install_node_mac() {
         fi
     fi
     
-    echo "�📦 Installing Node.js via Homebrew..."
-    brew install node
-    echo "✅ Node.js installed successfully"
+    echo "📦 Installing Node.js via Homebrew..."
+    brew install node ffmpeg
+    echo "✅ Node.js and ffmpeg installed successfully"
 }
 
 # Function to install Node.js on Linux
@@ -49,12 +49,12 @@ install_node_linux() {
         # Debian/Ubuntu
         echo "📦 Detected Debian/Ubuntu. Installing Node.js..."
         curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-        sudo apt-get install -y nodejs
+        sudo apt-get install -y nodejs ffmpeg
     elif [ -f /etc/redhat-release ]; then
         # RedHat/CentOS/Fedora
         echo "📦 Detected RedHat/CentOS/Fedora. Installing Node.js..."
         curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
-        sudo yum install -y nodejs
+        sudo yum install -y nodejs ffmpeg
     else
         echo "❌ Unsupported Linux distribution"
         echo "   Please install Node.js manually from: https://nodejs.org/"
@@ -109,6 +109,68 @@ if ! command -v node &> /dev/null; then
     fi
 else
     echo "✅ Node.js is already installed"
+fi
+
+# Function to install ffmpeg on macOS
+install_ffmpeg_mac() {
+    echo "🎥 Installing ffmpeg on macOS..."
+    if ! command -v brew &> /dev/null; then
+         echo "📦 Homebrew not found. Installing Homebrew..."
+         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+         if [[ $(uname -m) == 'arm64' ]]; then
+             echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+             eval "$(/opt/homebrew/bin/brew shellenv)"
+         fi
+    fi
+    brew install ffmpeg
+}
+
+# Function to install ffmpeg on Linux
+install_ffmpeg_linux() {
+    echo "🎥 Installing ffmpeg on Linux..."
+    if [ -f /etc/debian_version ]; then
+        sudo apt-get update && sudo apt-get install -y ffmpeg
+    elif [ -f /etc/redhat-release ]; then
+        sudo yum install -y ffmpeg
+    else
+        echo "❌ Unsupported Linux distribution for automated ffmpeg install"
+        echo "   Please install ffmpeg manually."
+        exit 1
+    fi
+}
+
+# Check if ffmpeg is installed
+if ! command -v ffmpeg &> /dev/null; then
+    echo ""
+    echo "⚠️  ffmpeg is not installed. It is required for video processing."
+    echo ""
+    read -p "Would you like to install ffmpeg now? (y/n): " -n 1 -r
+    echo ""
+    
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        case $OS in
+            mac)
+                install_ffmpeg_mac
+                ;;
+            linux)
+                install_ffmpeg_linux
+                ;;
+            windows)
+                echo "❌ Automated ffmpeg installation on Windows is not supported."
+                echo "   Please install ffmpeg manually or use the static build link provided later."
+                exit 1
+                ;;
+            *)
+                echo "❌ Unsupported OS for automated ffmpeg install"
+                exit 1
+                ;;
+        esac
+    else
+        echo "❌ ffmpeg is required."
+        exit 1
+    fi
+else
+    echo "✅ ffmpeg is already installed"
 fi
 
 # Verify Node.js and npm installation
@@ -427,6 +489,12 @@ elif [[ "$OS" == "linux" ]]; then
 elif [[ "$OS" == "windows" ]]; then
     echo "   🪟 Downloading yt-dlp for Windows..."
     curl -L "$YTDLP_BASE_URL/yt-dlp.exe" -o yt-dlp.exe
+    
+    # Download ffmpeg for Windows (simplified)
+    echo "   🎥 Downloading ffmpeg for Windows..."
+    curl -L "https://github.com/Start9Labs/ffmpeg-static/releases/download/v4.4.1/ffmpeg-win64-v4.4.1.zip" -o ffmpeg.zip
+    # Note: Unzipping logic would be complex in bash for windows, recommending manual install or winget
+    echo "   ⚠️  Please ensure ffmpeg is installed and in your PATH for Windows."
 else
     echo "   ⚠️  Could not determine OS for yt-dlp download."
     echo "   You may need to download it manually: https://github.com/yt-dlp/yt-dlp/releases"
