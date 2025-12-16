@@ -194,7 +194,7 @@ function TrimTube() {
     setError(null);
 
     try {
-      const response = await axios.post('https://localhost:3000/download', {
+      const response = await axios.post(`${window.location.protocol}//localhost:3000/download`, {
         url: `https://www.youtube.com/watch?v=${videoId}`,
         start: range[0],
         end: range[1],
