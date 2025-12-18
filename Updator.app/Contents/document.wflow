@@ -62,33 +62,49 @@
 					<string># 1. Setup Variables
 GITHUB_URL="https://github.com/thecodingpapa/batch-downloader/archive/refs/heads/main.zip"
 
-# Get the path of this Automator App
+# Get path of this app
 APP_PATH=$(osascript -e 'tell application "System Events" to get POSIX path of (path to me)')
-
-# Get the folder containing the App (the project root)
 TARGET_DIR=$(dirname "$APP_PATH")
 
-# Create temporary directory
+# Create a temp folder
 TEMP_DIR=$(mktemp -d)
+ZIP_FILE="$TEMP_DIR/project.zip"
 
-# 2. Download
-# -L follows redirects, -s is silent
-curl -L -s -o "$TEMP_DIR/project.zip" "$GITHUB_URL"
+# Notify
+osascript -e 'display notification "Starting Download..." with title "Updater"'
 
-# 3. Extract
-unzip -q "$TEMP_DIR/project.zip" -d "$TEMP_DIR/extracted"
+# 2. DOWNLOAD WITH CHECK
+# We capture the "Exit Code". 0 = Success. Anything else = Fail.
+curl -L -s -o "$ZIP_FILE" "$GITHUB_URL"
+EXIT_CODE=$?
 
-# Identify the inner folder (e.g., batch-downloader-main)
+# CHECK 1: Did curl crash?
+if [ $EXIT_CODE -ne 0 ]; then
+    osascript -e "display alert \"Download Failed\" message \"Curl error code: $EXIT_CODE\""
+    rm -rf "$TEMP_DIR"
+    exit 1
+fi
+
+# CHECK 2: Is the file empty? (Common if permissions deny writing)
+if [ ! -s "$ZIP_FILE" ]; then
+    osascript -e 'display alert "Download Failed" message " The file was created but is empty (0kb). Check internet or GitHub link."'
+    rm -rf "$TEMP_DIR"
+    exit 1
+fi
+
+# 3. EXTRACT
+osascript -e 'display notification "Download valid. Extracting..." with title "Updater"'
+unzip -q "$ZIP_FILE" -d "$TEMP_DIR/extracted"
+
+# Find inner folder
 SOURCE_CONTENT=$(find "$TEMP_DIR/extracted" -mindepth 1 -maxdepth 1 -type d | head -n 1)
 
-# 4. Paste and Overwrite
+# 4. INSTALL
 if [ -d "$SOURCE_CONTENT" ]; then
-    # Copy contents recursively (-R) to target
     cp -R "$SOURCE_CONTENT/"* "$TARGET_DIR/"
-    
-    osascript -e 'display notification "Batch Downloader updated successfully." with title "Updater"'
+    osascript -e 'display notification "Update Complete!" with title "Success" sound name "Glass"'
 else
-    osascript -e 'display notification "Error: Extraction failed." with title "Update Failed"'
+    osascript -e 'display alert "Extraction Failed" message "Zip file was valid, but unzip failed."'
 fi
 
 # Cleanup
@@ -96,7 +112,7 @@ rm -rf "$TEMP_DIR"</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
 					<key>inputMethod</key>
-					<integer>1</integer>
+					<integer>0</integer>
 					<key>shell</key>
 					<string>/bin/zsh</string>
 					<key>source</key>
@@ -202,8 +218,6 @@ rm -rf "$TEMP_DIR"</string>
 						<string>4</string>
 					</dict>
 				</dict>
-				<key>conversionLabel</key>
-				<integer>0</integer>
 				<key>isViewVisible</key>
 				<integer>1</integer>
 				<key>location</key>

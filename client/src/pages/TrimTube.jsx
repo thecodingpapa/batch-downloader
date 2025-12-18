@@ -248,7 +248,7 @@ function TrimTube() {
       <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
         <TextField
           fullWidth
-          label="Paste YouTube Link"
+          label="Your YouTube Link Here!"
           variant="outlined"
           value={url}
           onChange={handleUrlChange}
