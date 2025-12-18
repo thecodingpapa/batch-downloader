@@ -66,12 +66,14 @@ app.post('/download', upload.single('cookies'), (req, res) => {
 
   // yt-dlp command to download specific section
   // Note: Using the local binary
-  // Using android client to bypass YouTube bot detection
+  // Format selection prioritizes high quality:
+  // 1. Best video (preferring 1080p+) + best audio, merged to MP4
+  // 2. Falls back to best available quality if specific formats unavailable
   const args = [
     '--download-sections', `*${start}-${end}`,
-    '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+    '-f', 'bestvideo[height>=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best',
+    '--merge-output-format', 'mp4',
     '--force-keyframes-at-cuts',
-    '--extractor-args', 'youtube:player_client=android',
     '-o', outputPath,
     url
   ];
