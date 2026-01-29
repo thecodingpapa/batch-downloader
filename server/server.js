@@ -65,15 +65,14 @@ app.post('/download', upload.single('cookies'), (req, res) => {
   console.log(`Starting download for ${videoId}: ${start}s - ${end}s`);
 
   // yt-dlp command to download specific section
-  // Note: Using the local binary
-  // Format selection prioritizes high quality:
-  // 1. Best video (preferring 1080p+) + best audio, merged to MP4
-  // 2. Falls back to best available quality if specific formats unavailable
+  // Using Android client (no PO Token needed usually) and enabling Node.js runtime
+  // Simplified format selection for better compatibility
   const args = [
     '--download-sections', `*${start}-${end}`,
-    '-f', 'bestvideo[height>=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best',
+    '--extractor-args', 'youtube:player_client=android',
+    '--js-runtimes', 'node', // Enable Node.js for n-sig calculations
+    '-f', 'bv*[height>=1080]+ba/b',
     '--merge-output-format', 'mp4',
-    '--force-keyframes-at-cuts',
     '-o', outputPath,
     url
   ];

@@ -108,7 +108,7 @@ echo "-----------------------------------"
 # Start server in background
 echo "📡 Starting server on port $SERVER_PORT..."
 cd server
-PORT=$SERVER_PORT node server.js > ../server.log 2>&1 &
+PORT=$SERVER_PORT node server.js > ../server.log 2> >(tee -a ../server.log >&2) &
 SERVER_PID=$!
 echo $SERVER_PID > ../server.pid
 cd ..
@@ -119,7 +119,7 @@ sleep 2
 # Start client in background
 echo "🌐 Starting client on port $CLIENT_PORT..."
 cd client
-PORT=$CLIENT_PORT npm run dev > ../client.log 2>&1 &
+PORT=$CLIENT_PORT npm run dev > ../client.log 2> >(tee -a ../client.log >&2) &
 CLIENT_PID=$!
 echo $CLIENT_PID > ../client.pid
 cd ..
