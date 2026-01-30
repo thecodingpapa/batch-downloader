@@ -71,6 +71,7 @@ app.post('/download', upload.single('cookies'), (req, res) => {
     '--download-sections', `*${start}-${end}`,
     '--extractor-args', 'youtube:player_client=android',
     '--js-runtimes', 'node', // Enable Node.js for n-sig calculations
+    '--no-check-certificates', // Fix for SSL certificate errors
     '-f', 'bv*[height>=1080]+ba/b',
     '--merge-output-format', 'mp4',
     '-o', outputPath,
