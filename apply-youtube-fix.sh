@@ -69,9 +69,10 @@ if [ -f "$SERVER_JS" ]; then
             const endIndex = startIndex + endIndexRelative + endMarker.length;
             
             const newArgs = \`const args = [
-    '--download-sections', \\\`*\\\${start}-\\\${end}\\\`,
+    '--download-sections', \\\`*\\\${start}-\\\\${end}\\\`,
     '--extractor-args', 'youtube:player_client=android',
     '--js-runtimes', 'node', // Enable Node.js for n-sig calculations
+    '--no-check-certificates', // Fix for [SSL: CERTIFICATE_VERIFY_FAILED]
     '-f', 'bv*[height>=1080]+ba/b',
     '--merge-output-format', 'mp4',
     '-o', outputPath,
