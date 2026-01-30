@@ -93,7 +93,30 @@ if [ -f "$SERVER_JS" ]; then
     "
     
     if [ $? -eq 0 ]; then
-        echo "✨ Patch applied!"
+        echo "✨ Args array patched!"
+        
+        # Also fix common syntax error on console.log line
+        echo "🔧 Fixing console.log syntax..."
+        node -e "
+        const fs = require('fs');
+        const path = '${SERVER_JS}';
+        let content = fs.readFileSync(path, 'utf8');
+        
+        // Fix missing backticks in console.log
+        content = content.replace(
+            /console\.log\(Using cookies from/g,
+            'console.log(\`Using cookies from'
+        );
+        content = content.replace(
+            /from \\\${cookiesFile\.path}\)/g,
+            'from \${cookiesFile.path}\`)'
+        );
+        
+        fs.writeFileSync(path, content);
+        console.log('✅ Console.log syntax fixed');
+        "
+        
+        echo "✨ All patches applied!"
     else
         echo "⚠️  Patch failed. Restoring from backup..."
         cp "$SERVER_JS.bak" "$SERVER_JS"
