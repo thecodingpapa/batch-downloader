@@ -65,15 +65,16 @@ app.post('/download', upload.single('cookies'), (req, res) => {
   console.log(`Starting download for ${videoId}: ${start}s - ${end}s`);
 
   // yt-dlp command to download specific section
-  // Using Android client (no PO Token needed usually) and enabling Node.js runtime
-  // Simplified format selection for better compatibility
+  // Format fallback: best video+audio → progressively lower res (always with audio) → pre-merged
+  // Re-encodes to H.264+AAC with faststart for web-optimized playback
   const args = [
     '--download-sections', `*${start}-${end}`,
-    '--extractor-args', 'youtube:player_client=android',
     '--js-runtimes', 'node', // Enable Node.js for n-sig calculations
     '--no-check-certificates', // Fix for SSL certificate errors
-    '-f', 'bv*[height>=1080]+ba/b',
-    '--merge-output-format', 'mp4',
+    '-f', 'bv*+ba/bv[height>=1080]+ba/bv[height>=720]+ba/b',
+    '--recode-video', 'mp4', // Re-encode to H.264+AAC for web compatibility
+    '--postprocessor-args', '-c:v libx264 -c:a aac -movflags +faststart',
+    '--verbose',
     '-o', outputPath,
     url
   ];
