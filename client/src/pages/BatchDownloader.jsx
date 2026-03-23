@@ -43,7 +43,7 @@ function BatchDownloader() {
         console.log('Requesting download for videoId:', video.videoId, 'URL:', video.originalUrl, 'start:', video.start, 'end:', video.end);
         try {
           const formData = new FormData();
-          const response = await axios.post(`${window.location.protocol}//localhost:3000/download`, {
+          const response = await axios.post('/download', {
             url: video.originalUrl,
             start: video.start,
             end: video.end,

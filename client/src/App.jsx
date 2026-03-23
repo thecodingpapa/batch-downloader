@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import {
   Box,
@@ -17,7 +17,7 @@ function Navigation() {
   const location = useLocation();
   
   return (
-    <AppBar position="static" elevation={0} sx={{ bgcolor: 'transparent', pt: 2 }}>
+    <AppBar position="static" elevation={0} className="electron-drag" sx={{ bgcolor: 'transparent', pt: 2 }}>
         <Toolbar>
           <Container maxWidth="xl">
             <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -77,6 +77,15 @@ function Navigation() {
 }
 
 function App() {
+  const [appVersion, setAppVersion] = useState('');
+
+  useEffect(() => {
+    fetch('/api/version')
+      .then(res => res.json())
+      .then(data => setAppVersion(data.version))
+      .catch(() => setAppVersion(''));
+  }, []);
+
   return (
     <Router>
         <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -86,6 +95,21 @@ function App() {
                 <Route path="/trim" element={<TrimTube />} />
                 <Route path="/test" element={<TrimTubeTest />} />
             </Routes>
+            {appVersion && (
+              <Typography
+                sx={{
+                  position: 'fixed',
+                  bottom: 8,
+                  right: 12,
+                  fontSize: '0.7rem',
+                  color: 'rgba(255,255,255,0.25)',
+                  pointerEvents: 'none',
+                  userSelect: 'none',
+                }}
+              >
+                v{appVersion}
+              </Typography>
+            )}
         </Box>
     </Router>
   );

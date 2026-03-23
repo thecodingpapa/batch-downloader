@@ -1,354 +1,332 @@
-# Deployment Guide
+# DigitalOcean Deployment Guide
 
-This guide covers deploying the frontend to Firebase Hosting and the backend to AWS EC2.
-
-> **Note**: For local installation from scratch, see [INSTALLATION.md](INSTALLATION.md)
+Complete walkthrough for deploying Batch Downloader to DigitalOcean.
 
 ---
 
-## Frontend Deployment (Firebase Hosting)
+## Part 1: Create DigitalOcean Droplet
 
-### Prerequisites
-- Firebase account
-- Node.js and npm installed (see [INSTALLATION.md](INSTALLATION.md) if starting from scratch)
-- Firebase CLI installed globally
+### 1.1 Sign Up & Create Droplet
+1. Go to [DigitalOcean](https://www.digitalocean.com)
+2. Sign up (use referral code for $200 credit if first time)
+3. Click **"Create"** → **"Droplets"**
 
-### Step 1: Install Firebase CLI
-```bash
-npm install -g firebase-tools
-```
+### 1.2 Droplet Configuration
+- **Image**: Ubuntu 24.04 LTS (recommended)
+- **Plan**: Basic
+- **CPU Options**: Regular (4GB RAM / 2 vCPUs - $18/month)
+- **Datacenter**: Choose closest to your users (e.g., Singapore, San Francisco)
+- **Authentication**: SSH Key (recommended) or Password
+- **Hostname**: `batch-downloader` or `pigsub-downloader`
+- Click **"Create Droplet"**
 
-### Step 2: Login to Firebase
-```bash
-firebase login
-```
-
-### Step 3: Initialize Firebase in Your Project
-Navigate to the `client` directory:
-```bash
-cd client
-firebase init hosting
-```
-
-When prompted:
-- **Select a Firebase project**: Choose an existing project or create a new one
-- **What do you want to use as your public directory?**: Enter `dist`
-- **Configure as a single-page app?**: Yes
-- **Set up automatic builds and deploys with GitHub?**: No (unless you want CI/CD)
-- **Overwrite existing files?**: No
-
-### Step 4: Build the Frontend
-```bash
-npm run build
-```
-
-This creates an optimized production build in the `dist` folder.
-
-### Step 5: Update API Endpoint
-Before deploying, update the backend URL in `src/App.jsx`:
-
-```javascript
-// Change from:
-const response = await axios.post('http://localhost:3000/download', {
-
-// To (replace with your EC2 public IP or domain):
-const response = await axios.post('http://YOUR_EC2_IP:3000/download', {
-```
-
-Then rebuild:
-```bash
-npm run build
-```
-
-### Step 6: Deploy to Firebase
-```bash
-firebase deploy --only hosting
-```
-
-Your app will be live at: `https://YOUR_PROJECT_ID.web.app`
+### 1.3 Get IP Address
+After creation (~60 seconds), copy your droplet's **IP address** (e.g., `143.198.123.45`)
 
 ---
 
-## Backend Deployment (AWS EC2)
+## Part 2: Initial Server Setup
 
-### Prerequisites
-- AWS account
-- EC2 instance running (Ubuntu 22.04 LTS recommended)
-- SSH access to your EC2 instance
-
-### Step 1: Launch an EC2 Instance
-
-1. Go to AWS Console → EC2 → Launch Instance
-2. Choose **Ubuntu Server 22.04 LTS**
-3. Instance type: **t2.micro** (free tier) or **t2.small** (recommended for video processing)
-4. Configure Security Group:
-   - SSH (port 22) - Your IP
-   - Custom TCP (port 3000) - Anywhere (0.0.0.0/0)
-5. Create/select a key pair for SSH access
-6. Launch the instance
-
-### Step 2: Fix SSH Key Permissions
-
-After downloading your `.pem` key file, you need to set the correct permissions:
-
+### 2.1 SSH into Server
 ```bash
-# Navigate to where your key is stored
-cd ~/.ssh
-
-# Set correct permissions (read-only for owner)
-chmod 400 batch-downloader.pem
-
-# Verify permissions (should show -r--------)
-ls -l batch-downloader.pem
+ssh root@YOUR_IP_ADDRESS
+# Example: ssh root@143.198.123.45
 ```
 
-> **Why?** SSH requires that private key files are not accessible by others for security reasons. The error "WARNING: UNPROTECTED PRIVATE KEY FILE!" means the permissions are too open (0644 allows read access to everyone).
-
-### Step 3: Connect to Your EC2 Instance
+### 2.2 Update System
 ```bash
-ssh -i ~/.ssh/batch-downloader.pem ubuntu@YOUR_EC2_PUBLIC_IP
+apt update && apt upgrade -y
 ```
 
-If you still get permission errors, ensure:
-- The key file is in the correct location
-- You're using the correct username (`ubuntu` for Ubuntu instances, `ec2-user` for Amazon Linux)
-- Your EC2 Security Group allows SSH (port 22) from your IP
-
-### Step 4: Install Node.js and Dependencies
+### 2.3 Create Non-Root User (Security Best Practice)
 ```bash
-# Update system
-sudo apt update && sudo apt upgrade -y
-
-# Install Node.js (v20.x)
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
-
-# Install ffmpeg
-sudo apt install -y ffmpeg
-
-# Install Python 3 (for yt-dlp)
-sudo apt install -y python3 python3-pip
-
-# Verify installations
-node --version
-npm --version
-ffmpeg -version
-python3 --version
+adduser deployer
+usermod -aG sudo deployer
 ```
 
-### Step 5: Transfer Backend Files to EC2
-
-On your local machine, from the project root:
+Switch to new user:
 ```bash
-# Create a tarball of the server directory
-cd /Users/wonjunyang/Documents/Playground/batch-downloader
-tar -czf server.tar.gz server/
-
-# Copy to EC2
-scp -i ~/.ssh/batch-downloader.pem server.tar.gz ubuntu@YOUR_EC2_PUBLIC_IP:~/
+su - deployer
 ```
 
-### Step 6: Set Up the Backend on EC2
+---
 
-SSH into your EC2 instance and run:
+## Part 3: Install Dependencies
+
+### 3.1 Clone Your Repository
 ```bash
-# Extract the files
-tar -xzf server.tar.gz
-cd server
-
-# Install Node.js dependencies
-npm install
-
-# Download yt-dlp binary (already included in your server folder)
-# Verify it's executable
-chmod +x yt-dlp
-
-# Test yt-dlp
-./yt-dlp --version
+cd ~
+git clone https://github.com/thecodingpapa/batch-downloader.git
+cd batch-downloader
 ```
 
-### Step 7: Configure CORS for Frontend
-
-Edit `server.js` to allow your Firebase domain:
-```javascript
-// Update the CORS configuration
-app.use(cors({
-  origin: ['http://localhost:5173', 'https://YOUR_PROJECT_ID.web.app'],
-  credentials: true
-}));
+### 3.2 Run Installation Script
+```bash
+chmod +x install-batch-downloader.sh
+./install-batch-downloader.sh
 ```
 
-### Step 8: Run the Server with PM2 (Process Manager)
+This installs:
+- Node.js
+- npm
+- ffmpeg
+- yt-dlp
+- All project dependencies
 
-Install PM2 to keep the server running:
+---
+
+## Part 4: Install PM2 (Process Manager)
+
+PM2 keeps your app running even after you disconnect.
+
 ```bash
 sudo npm install -g pm2
+```
 
-# Start the server
-pm2 start server.js --name "batch-downloader"
+---
 
-# Save the PM2 process list
+## Part 5: Configure Application for Production
+
+### 5.1 Build Client for Production
+```bash
+cd ~/batch-downloader/client
+npm run build
+```
+
+### 5.2 Install Static File Server for Client
+```bash
+sudo npm install -g serve
+```
+
+### 5.3 Start Services with PM2
+
+**Start Server:**
+```bash
+cd ~/batch-downloader/server
+pm2 start server.js --name batch-server
+```
+
+**Start Client:**
+```bash
+cd ~/batch-downloader/client
+pm2 start "serve -s dist -l 5174" --name batch-client
+```
+
+**Save PM2 Configuration:**
+```bash
 pm2 save
-
-# Set PM2 to start on system boot
 pm2 startup
-# Follow the instructions from the output
+# Copy and run the command that PM2 outputs
 ```
 
-### Step 9: Verify the Server is Running
+**Check Status:**
 ```bash
-# Check PM2 status
 pm2 status
-
-# Check logs
-pm2 logs batch-downloader
-
-# Test the server
-curl http://localhost:3000
+pm2 logs
 ```
 
-### Step 10: (Optional) Set Up Nginx as Reverse Proxy
+---
 
-For production, use Nginx:
+## Part 6: Install & Configure Nginx
+
+### 6.1 Install Nginx
 ```bash
-sudo apt install -y nginx
-
-# Create Nginx configuration
-sudo nano /etc/nginx/sites-available/clip-downloader
+sudo apt install nginx -y
 ```
 
-Add this configuration:
+### 6.2 Create Nginx Configuration
+```bash
+sudo nano /etc/nginx/sites-available/batch-downloader
+```
+
+Paste this configuration:
 ```nginx
 server {
     listen 80;
-    server_name YOUR_EC2_PUBLIC_IP;
+    server_name YOUR_IP_OR_DOMAIN;
 
+    # Client (Frontend)
     location / {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://localhost:5174;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
         proxy_cache_bypass $http_upgrade;
     }
+
+    # API (Backend)
+    location /api {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        
+        # Increase timeout for large file downloads
+        proxy_read_timeout 600s;
+        proxy_connect_timeout 600s;
+        proxy_send_timeout 600s;
+    }
 }
 ```
 
-Enable the site:
+**Note**: Replace `YOUR_IP_OR_DOMAIN` with your actual IP or domain.
+
+### 6.3 Enable Configuration
 ```bash
-sudo ln -s /etc/nginx/sites-available/clip-downloader /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/batch-downloader /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
 ```
 
-Update your Security Group to allow HTTP (port 80).
-
 ---
 
-## Environment Variables (Optional)
+## Part 7: Configure Firewall
 
-Create a `.env` file in the server directory:
 ```bash
-PORT=3000
-NODE_ENV=production
-```
-
-Update `server.js` to use it:
-```javascript
-require('dotenv').config();
-const PORT = process.env.PORT || 3000;
+sudo ufw allow OpenSSH
+sudo ufw allow 'Nginx Full'
+sudo ufw enable
+sudo ufw status
 ```
 
 ---
 
-## Monitoring and Maintenance
+## Part 8: SSL Setup (HTTPS)
 
-### View Server Logs
+### 8.1 Install Certbot
 ```bash
-pm2 logs batch-downloader
+sudo apt install certbot python3-certbot-nginx -y
 ```
 
-### Restart Server
+### 8.2 Get SSL Certificate
+
+**If using domain name:**
 ```bash
-pm2 restart batch-downloader
+sudo certbot --nginx -d yourdomain.com
 ```
 
-### Update the Server
+**If using IP only:**
+You'll need a self-signed certificate:
 ```bash
-# On local machine, create new tarball
-tar -czf server.tar.gz server/
-scp -i ~/.ssh/batch-downloader.pem server.tar.gz ubuntu@YOUR_EC2_PUBLIC_IP:~/
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/ssl/private/nginx-selfsigned.key \
+  -out /etc/ssl/certs/nginx-selfsigned.crt
+```
 
-# On EC2
-cd ~
-tar -xzf server.tar.gz
-cd server
-npm install
-pm2 restart batch-downloader
+Then update nginx config to use certificates.
+
+---
+
+## Part 9: Access Your Application
+
+### Via IP Address:
+```
+http://YOUR_IP_ADDRESS
+```
+
+### Via Domain (if configured):
+```
+https://yourdomain.com
+```
+
+---
+
+## Part 10: Embed in Iframe (pigsub.com)
+
+On your `pigsub.com` website:
+
+```html
+<iframe 
+  src="https://YOUR_IP_OR_DOMAIN" 
+  width="100%" 
+  height="800px"
+  frameborder="0"
+  allow="clipboard-write"
+></iframe>
+```
+
+---
+
+## Maintenance Commands
+
+### View Logs
+```bash
+pm2 logs
+pm2 logs batch-server
+pm2 logs batch-client
+```
+
+### Restart Services
+```bash
+pm2 restart all
+pm2 restart batch-server
+```
+
+### Update Code
+```bash
+cd ~/batch-downloader
+git pull
+./stop-batch-downloader.sh
+cd client && npm run build && cd ..
+pm2 restart all
+```
+
+### Monitor Resources
+```bash
+pm2 monit
+htop
 ```
 
 ---
 
 ## Troubleshooting
 
-### SSH Connection Issues
-
-**Error: "WARNING: UNPROTECTED PRIVATE KEY FILE!"**
+### Service won't start
 ```bash
-# Fix permissions
-chmod 400 ~/.ssh/batch-downloader.pem
-
-# Verify
-ls -l ~/.ssh/batch-downloader.pem
-# Should show: -r-------- (400)
+pm2 logs batch-server --lines 50
 ```
 
-**Error: "Permission denied (publickey)"**
-- Ensure you're using the correct key file
-- Verify you're using the correct username (`ubuntu` for Ubuntu, `ec2-user` for Amazon Linux)
-- Check that your EC2 Security Group allows SSH (port 22) from your IP
-- Verify the key pair matches the one assigned to your EC2 instance
+### Can't access from browser
+```bash
+sudo nginx -t
+sudo systemctl status nginx
+sudo ufw status
+```
 
-**Error: "Connection timed out"**
-- Check your EC2 Security Group allows SSH from your IP address
-- Verify the EC2 instance is running
-- Ensure you're using the correct public IP address
-
-### Frontend can't connect to backend
-- Check EC2 Security Group allows port 3000 (or 80 if using Nginx)
-- Verify CORS configuration in `server.js`
-- Check the API URL in `App.jsx`
-
-### yt-dlp fails to download
-- Ensure `yt-dlp` binary is executable: `chmod +x yt-dlp`
-- Update yt-dlp: `./yt-dlp -U` or download latest from GitHub
-
-### Server crashes or runs out of memory
-- Upgrade to a larger EC2 instance (t2.small or t2.medium)
-- Add swap space:
-  ```bash
-  sudo fallocate -l 2G /swapfile
-  sudo chmod 600 /swapfile
-  sudo mkswap /swapfile
-  sudo swapon /swapfile
-  echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-  ```
+### Out of disk space
+```bash
+df -h
+# Clean old downloads
+rm -rf ~/batch-downloader/server/downloads/*
+```
 
 ---
 
-## Cost Optimization
+## Cost Estimate
 
-- Use **AWS Free Tier** (t2.micro) for testing
-- Stop EC2 instance when not in use
-- Use **Firebase Free Plan** (10GB hosting, 360MB/day bandwidth)
-- Consider AWS Lambda + API Gateway for serverless backend (more complex setup)
+- **Droplet**: $18/month (4GB RAM)
+- **Bandwidth**: 4TB included (should be sufficient)
+- **Domain** (optional): ~$12/year
+- **Total**: ~$18-20/month
+
+---
+
+## Security Recommendations
+
+1. **Add Authentication**: Protect with password/JWT
+2. **Rate Limiting**: Prevent abuse
+3. **IP Whitelist**: Restrict to your team's IPs
+4. **Regular Updates**: `apt update && apt upgrade`
+5. **Backups**: Enable DigitalOcean automated backups (+20% cost)
 
 ---
 
 ## Next Steps
 
-1. Set up a custom domain for Firebase Hosting
-2. Add HTTPS with Let's Encrypt for EC2 (if using Nginx)
-3. Implement authentication for the download endpoint
-4. Add rate limiting to prevent abuse
-5. Set up CloudWatch or monitoring for EC2
+1. Test the deployment thoroughly
+2. Add authentication if needed
+3. Monitor usage and costs
+4. Set up alerts for high bandwidth usage

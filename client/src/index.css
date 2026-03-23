@@ -25,3 +25,18 @@ code {
     width: 100% !important;
     height: 100% !important;
 }
+
+/* Electron window drag region — lets users drag the window from the header area */
+.electron-drag {
+    -webkit-app-region: drag;
+}
+
+/* Prevent buttons/links inside drag regions from being swallowed */
+.electron-drag a,
+.electron-drag button,
+.electron-drag input,
+.electron-drag select,
+.electron-drag textarea,
+.electron-no-drag {
+    -webkit-app-region: no-drag;
+}

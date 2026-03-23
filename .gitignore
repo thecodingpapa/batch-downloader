@@ -11,3 +11,14 @@ batch-downloader.code-workspace
 
 # SSL certificates (machine-specific, auto-generated)
 *.pem
+
+# Dependencies
+/node_modules
+
+# Electron build output
+/release
+/build/*.icns
+/build/*.ico
+
+# OS files
+.DS_Store
