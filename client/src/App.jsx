@@ -99,12 +99,15 @@ function App() {
               <Typography
                 sx={{
                   position: 'fixed',
-                  bottom: 8,
-                  right: 12,
-                  fontSize: '0.7rem',
-                  color: 'rgba(255,255,255,0.25)',
+                  top: 12,
+                  right: 16,
+                  fontSize: '0.75rem',
+                  color: 'rgba(255,255,255,0.35)',
                   pointerEvents: 'none',
                   userSelect: 'none',
+                  zIndex: 1300,
+                  fontFamily: 'monospace',
+                  letterSpacing: '0.5px',
                 }}
               >
                 v{appVersion}

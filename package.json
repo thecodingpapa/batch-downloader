@@ -1,6 +1,6 @@
 {
   "name": "batch-downloader",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A desktop app to batch download YouTube video clips with custom start and end times",
   "main": "electron/main.js",
   "author": "TheCodingPapa",
@@ -10,11 +10,11 @@
     "dev": "electron .",
     "build:client": "cd client && npm install && npm run build",
     "version:patch": "npm version patch --no-git-tag-version",
-    "prepackage": "npm run version:patch && npm run build:client",
-    "package:mac": "electron-builder --mac",
-    "package:win": "electron-builder --win",
-    "package:linux": "electron-builder --linux",
-    "package:all": "electron-builder --mac --win --linux"
+    "prebuild": "npm run version:patch && npm run build:client",
+    "package:mac": "npm run prebuild && electron-builder --mac",
+    "package:win": "npm run prebuild && electron-builder --win",
+    "package:linux": "npm run prebuild && electron-builder --linux",
+    "package:all": "npm run prebuild && electron-builder --mac --win --linux"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -44,7 +44,9 @@
       {
         "from": "server/yt-dlp",
         "to": "yt-dlp",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "asarUnpack": [
@@ -55,7 +57,9 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["universal"]
+          "arch": [
+            "universal"
+          ]
         }
       ],
       "icon": "build/icon.icns",
@@ -65,12 +69,22 @@
     "dmg": {
       "title": "Batch Downloader",
       "contents": [
-        { "x": 130, "y": 220 },
-        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
       ]
     },
     "win": {
-      "target": ["nsis"],
+      "target": [
+        "nsis"
+      ],
       "icon": "build/icon.ico"
     },
     "nsis": {
@@ -79,7 +93,9 @@
       "allowToChangeInstallationDirectory": false
     },
     "linux": {
-      "target": ["AppImage"],
+      "target": [
+        "AppImage"
+      ],
       "icon": "build/icon.png",
       "category": "Utility"
     }

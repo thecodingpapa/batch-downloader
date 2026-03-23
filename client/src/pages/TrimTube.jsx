@@ -11,10 +11,19 @@ import {
   Stack,
   CircularProgress,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  Chip,
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
+import HighQualityIcon from '@mui/icons-material/HighQuality';
 import axios from 'axios';
 
 function TrimTube() {
@@ -27,6 +36,13 @@ function TrimTube() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [error, setError] = useState(null);
   const [playerReady, setPlayerReady] = useState(false);
+
+  // Resolution picker state
+  const [resDialogOpen, setResDialogOpen] = useState(false);
+  const [resolutions, setResolutions] = useState([]);
+  const [selectedRes, setSelectedRes] = useState('');
+  const [loadingFormats, setLoadingFormats] = useState(false);
+  const [formatsError, setFormatsError] = useState(null);
   
   const playerRef = useRef(null);
   const parsedTimesRef = useRef({ start: 0, end: 0 });
@@ -188,8 +204,34 @@ function TrimTube() {
     return `${mm}:${pad(ss)}`;
   };
 
-  const handleDownload = async () => {
+  const handleDownloadClick = async () => {
     if (!videoId) return;
+    setFormatsError(null);
+    setResDialogOpen(true);
+    setLoadingFormats(true);
+    setResolutions([]);
+    setSelectedRes('');
+
+    try {
+      const response = await axios.post('/formats', {
+        url: `https://www.youtube.com/watch?v=${videoId}`,
+      });
+      const resList = response.data.resolutions || [];
+      setResolutions(resList);
+      // Pre-select the highest resolution
+      if (resList.length > 0) {
+        setSelectedRes(resList[0].formatFilter);
+      }
+    } catch (err) {
+      setFormatsError(err.response?.data?.error || 'Failed to fetch available resolutions');
+    } finally {
+      setLoadingFormats(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!videoId || !selectedRes) return;
+    setResDialogOpen(false);
     setIsDownloading(true);
     setError(null);
 
@@ -198,7 +240,8 @@ function TrimTube() {
         url: `https://www.youtube.com/watch?v=${videoId}`,
         start: range[0],
         end: range[1],
-        videoId: videoId
+        videoId: videoId,
+        formatFilter: selectedRes,
       }, {
         responseType: 'blob',
       });
@@ -313,7 +356,7 @@ function TrimTube() {
                 
                 <Button
                   variant="contained"
-                  onClick={handleDownload}
+                  onClick={handleDownloadClick}
                   disabled={isDownloading || !playerReady}
                   startIcon={isDownloading ? <CircularProgress size={20} color="inherit" /> : <DownloadIcon />}
                   sx={{
@@ -336,6 +379,114 @@ function TrimTube() {
           </Alert>
         )}
       </Paper>
+
+      {/* Resolution Picker Dialog */}
+      <Dialog
+        open={resDialogOpen}
+        onClose={() => setResDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+            color: '#fff',
+          }
+        }}
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, pb: 1 }}>
+          <HighQualityIcon sx={{ color: '#ff9100' }} />
+          Select Resolution
+        </DialogTitle>
+        <DialogContent dividers sx={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+          {loadingFormats ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4, gap: 2 }}>
+              <CircularProgress sx={{ color: '#ff9100' }} />
+              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                Fetching available resolutions...
+              </Typography>
+            </Box>
+          ) : formatsError ? (
+            <Alert severity="error" sx={{ mt: 1 }}>
+              {formatsError}
+            </Alert>
+          ) : resolutions.length === 0 ? (
+            <Typography sx={{ py: 2, color: 'rgba(255,255,255,0.7)' }}>
+              No resolutions found.
+            </Typography>
+          ) : (
+            <RadioGroup
+              value={selectedRes}
+              onChange={(e) => setSelectedRes(e.target.value)}
+            >
+              {resolutions.map((r, idx) => (
+                <FormControlLabel
+                  key={r.height}
+                  value={r.formatFilter}
+                  control={
+                    <Radio
+                      sx={{
+                        color: 'rgba(255,255,255,0.5)',
+                        '&.Mui-checked': { color: '#ff9100' },
+                      }}
+                    />
+                  }
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography>{r.label}</Typography>
+                      {idx === 0 && (
+                        <Chip
+                          label="Best"
+                          size="small"
+                          sx={{
+                            background: 'linear-gradient(to right, #f50057, #ff9100)',
+                            color: '#fff',
+                            fontWeight: 'bold',
+                            fontSize: '0.7rem',
+                            height: 22,
+                          }}
+                        />
+                      )}
+                    </Box>
+                  }
+                  sx={{
+                    mx: 0,
+                    py: 0.5,
+                    borderRadius: 2,
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' },
+                  }}
+                />
+              ))}
+            </RadioGroup>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button
+            onClick={() => setResDialogOpen(false)}
+            sx={{ color: 'rgba(255,255,255,0.7)' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleDownload}
+            disabled={!selectedRes || loadingFormats}
+            startIcon={<DownloadIcon />}
+            sx={{
+              background: 'linear-gradient(to right, #f50057, #ff9100)',
+              '&:hover': {
+                background: 'linear-gradient(to right, #c51162, #ff6d00)',
+              },
+              '&.Mui-disabled': {
+                background: 'rgba(255,255,255,0.1)',
+                color: 'rgba(255,255,255,0.3)',
+              },
+            }}
+          >
+            Download
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }
